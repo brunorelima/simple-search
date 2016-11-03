@@ -1,4 +1,6 @@
-var urlControlador = "http://www.brelzin.com.br/ws/estados.php";
+//var urlControlador = "http://www.brelzin.com.br/ws/estados.php";
+var urlControlador = "https://testevirtualif.iftm.edu.br/TESTES/estados.php";
+
 
 $(document).ready(function() {
 	
