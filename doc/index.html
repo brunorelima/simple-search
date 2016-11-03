@@ -1,0 +1,985 @@
+
+<meta charset="utf-8"/>
+
+<!-- Estilo -->
+<!-- <link rel="stylesheet" href="/recursos/bootstrap/3.3.5/css/bootstrap.min.css" type="text/css"/> -->
+<!-- Versões simplificadas -->
+<!-- <link rel="stylesheet" href="/recursos/simpleSearch/simpleSearch.bootstrap.min.css" type="text/css"/> -->
+<!-- <link rel="stylesheet" href="/recursos/simpleSearch/simpleSearch.min.css" type="text/css"/> -->
+
+<!-- Jquery -->
+<!-- <script src="/recursos/jquery/3.1.0/jquery-3.1.0.min.js"></script> -->
+<!-- Para testar em versões antigas -->
+<!-- <script src="/recursos/jquery/1.11.3/jquery.js"></script> -->
+<!-- <script src="/js/jquery-1.4.4.min.js"></script> -->
+
+
+<style>
+	legend { margin-top: 30px; }
+</style>
+
+
+  	<div class="container">
+        <h1>SimpleSearch</h1>
+        <p>Biblioteca javascript para pesquisas no estilo autocomplete com ou sem formulário e tabelas, podendo ser personalizado de acordo com as configurações passadas.</p>
+    </div>
+    
+    
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-4">
+          <h2>Exemplos</h2>
+          <p>Conheça vários modelos de uso, utilizando formulário, tabelas ou paginação. </p>
+          <p><a class="btn btn-default" href="#exemplos" role="button">Ver detalhes &raquo;</a></p>
+       </div>
+        <div class="col-md-4">
+          <h2>Documentação</h2>
+          <p>Consulte como funciona cada recurso da api, para configurar da melhor maneira. </p>
+          <p><a class="btn btn-default" href="#documentacao" role="button"> Ver detalhes &raquo;</a></p>
+       </div>
+     </div>
+    
+
+
+<div class="container">
+
+<!-- 	<h2> SimpleSearch </h2>	 -->
+<!-- 	<p>Api para fazer pesquisar de forma mais simplificada apartir de campos de texto ou em formulários. </p> -->
+	
+	
+	
+	<legend> Exemplo de uso </legend>
+	
+	
+	<form class="form-horizontal">
+		<div class="form-group">
+			<div class="col-sm-6"> 
+				<input type="text" class="form-control" id="inputNome" placeholder="Aperte Enter ou digite um nome de estado do Brasil" />
+			</div> 
+			<div class="col-sm-2"> 
+				<input type="text" class="form-control" id="inputValorId" readonly title="valor do campo selecionado" placeholder="Valor" /> 
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<div class="col-sm-8">
+				<pre>	
+					<code>
+	var ssEstados =  new SimpleSearch({
+		url: "/arquivos/controlador/consultarCmUf.php",
+		query: "#<strong>inputNome</strong>",
+		queryId: "#<strong>inputId</strong>",
+		field: "ds_nome",
+		fieldId: "id",  
+		fieldRecords: "obj.registros", 
+	});		
+	
+	&#60;!-- Código HTML básico --&#62;
+	&#60;input type="text" id="<strong>inputNome</strong>" /&#62;
+	&#60;input type="hidden" id="<strong>inputId</strong>" /&#62;	
+					</code>
+				</pre>
+			</div>
+		</div>
+		
+	</form>
+	
+	<legend> Importando arquivos </legend>
+	<div>
+		<p> Biblioteca Javascript: </p>
+		<div>
+			<code>  &#60;script src="/recursos/simpleSearch/js/simpleSearch.min.js" type="application/javascript"&#62; &#60;/script&#62; </code>
+		</div>
+		<br />
+		<p> Caso o projeto não tenha importado o Twitter Boostrap ainda, é necessário importar o estilo base, escolhendo entre recursos mínimos usados do Bootstrap, ou uma versão simplificada de css. </p>
+		<div>
+			<code> &#60;link rel="stylesheet" href="/recursos/simpleSearch/css/simpleSearch.bootstrap.min.css" type="text/css" /&#62; </code>
+		</div>
+		<div>		
+			<code> &#60;link rel="stylesheet" href="/recursos/simpleSearch/css/simpleSearch.min.css" type="text/css" /&#62; </code>
+		</div>
+	</div>
+	
+</div>
+
+<br />
+
+<div class="container">
+
+	<h2 id="exemplos">Exemplos</h2>
+
+	<div id="formCmUf" 
+		class="form-horizontal" 
+		role="form" 
+		onsubmit="return false;">
+		
+		<legend>Comuns</legend>
+		
+		<div class="item-exemplo">
+		
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Básico </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca0" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor0" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+	
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+					<pre>
+<code>		
+	var ssBuscaBasico =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca0",
+		queryId: "#buscaValor0",
+		field: "ds_nome",
+		fieldId: "id", 
+		fieldRecords: "obj.registros", 
+	});
+</code>		
+					</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>	
+		
+		</div>
+		
+
+		<div class="item-exemplo">
+		
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Passando parametros </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca01" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor01" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+			
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+					<pre>
+<code>		
+	var ssBuscaEnviandoParametros =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca01",
+		queryId: "#buscaValor01",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		fieldSizePages: "obj.propriedades.qtdPaginasTotal",
+		data: function(){ return {
+			filtro: "palavraFiltrada"
+		} },
+	});
+</code>		
+					</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+			
+		</div>
+
+
+		<div class="item-exemplo">
+
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> 3 Caracteres no mínimo </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca02" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor02" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+			
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+					<pre>
+<code>		
+	var ssBuscaMinimoParametros =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca02",
+		queryId: "#buscaValor02",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		minLength: 3,
+	});
+</code>		
+					</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Com autoPesquisar </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca021" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor021" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+			
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+					<pre>
+<code>		
+	var ssBuscaComTemporizador =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca021",
+		queryId: "#buscaValor021",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		delayAutoSearch: 1200,
+	});
+</code>		
+					</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Com complemento </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca022" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor022" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+			
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+					<pre>
+<code>		
+	var ssBuscaComComplemento =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca022",
+		queryId: "#buscaValor022",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		templateComplement: "Sigla #ds_sigla#",
+	});
+</code>		
+					</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Template para registros </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca03" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor03" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+			
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+					<pre>
+<code>		
+	var ssBuscaComTemplate =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca03",
+		queryId: "#buscaValor03",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		templateField: "#ds_sigla# - #ds_nome#",
+	});
+</code>		
+					</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Usando Callbacks </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca04" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor04" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+				<pre>
+<code>		
+	var ssBuscaComCallback =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca04",
+		queryId: "#buscaValor04",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		onselect: function( row ){ $("#buscaValor04").val(row.id + " " + row.ds_nome); },
+		onreset: function( row ){ $("#buscaValor04").val(""); },
+		onsuccess: function( response ){ if (response.status == 'erro') throw Error("Deu erro na resposta do servidor!"); return true; }
+	});
+</code>		
+				</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Inicializado </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca05" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor05" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Inicializado
+	var ssBuscaInicializado =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca05",
+		queryId: "#buscaValor05",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",			
+		defaultValue: [11, "Minas Gerais"],
+	});
+// 	ssBuscaInicializado.select(11, "Minas Gerais");
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Bloqueado </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca06" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor06" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Bloqueado
+	var ssBuscaBloqueado =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca06",
+		queryId: "#buscaValor06",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		defaultValue: [26, "São Paulo"],
+	});
+// 	ssBuscaBloqueado.select(26, "São Paulo");
+	ssBuscaBloqueado.disabled();
+// 	ssBuscaBloqueado.enabled();
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<legend>Permitindo vários registros</legend>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Com vários itens </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca07" />
+				</div>			
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Com container de itens
+	var ssBuscaComItens =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca07",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		inputNames: "estadosSelecionados[]",
+	});
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Com vários itens inicializado</label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca08" />
+				</div>			
+			<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Com container de itens iniciado
+	var ssBuscaComItensIniciado =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca08",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		inputNames: "estadosSelecionados[]",
+		defaultValue: [[19, "Rio de Janeiro"], [8, "Espírito Santo"]],
+	});
+// 	ssBuscaComItensIniciado.select(19, "Rio de Janeiro");
+// 	ssBuscaComItensIniciado.select(8, "Espírito Santo");
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+		
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Vários itens e com complemento iniciado</label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca075" />
+				</div>			
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Com container de itens e complemento e iniciado
+	var ssBuscaComItensComplementoIniciado =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca075",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		inputNames: "estadosSelecionados[]",
+		defaultValue: [[19, "Rio de Janeiro", "Rio de Janeiro - RJ"], [8, "Espírito Santo", "Espírito Santo - ES"]],
+		templateComplement: "#ds_nome# - #ds_sigla#",
+	});
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>		
+		
+		
+		<legend>Tabelas</legend>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Formato Tabela </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca10" />
+				</div>			
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor10" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Usando tabelas
+	var ssBuscaComTabelas =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca10",
+		queryId: "#buscaValor10",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",		
+		tableTitles: ["Sigla", "Nome"],
+		tableFields: ["ds_sigla", "ds_nome"],
+	});
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+		
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Com Paginação </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca11" />
+				</div>
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor11" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Usando tabelas com paginação
+	var ssBuscaTabelasComPaginacao =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca11",		
+		queryId: "#buscaValor11",	
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		fieldPages: "obj.navegacao.paginas",
+		tableTitles: ["Sigla", "Nome"],
+		tableFields: ["ds_sigla", "ds_nome"],
+		queryForm: "#busca11",
+	});
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Tabela Externa </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca12" />
+				</div>
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="buscaValor12" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Usando tabelas externas
+	var ssBuscaComTabelasExterna =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca12",
+		queryId: "#buscaValor12",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		fieldPages: "obj.navegacao.paginas",
+		tableTitles: ["Sigla", "Nome"],
+		tableFields: ["ds_sigla", "ds_nome"],
+		queryContent: "#externo12",
+		queryForm: "#busca12",
+		tableShowSelect: true, //Para exibir ícone de selecionar
+		tableKeepOpen: true, //Para manter aberto ao perder o foco
+	});
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>			
+		<div id="externo12"></div>
+
+		<div class="item-exemplo">	 
+			<form id="busca13" onsubmit="return false;">
+				<div class="form-group"> 
+					<label for="busca" class="col-sm-2 control-label"> Com Formulário </label>
+				
+					<div class="col-sm-2"> 
+						<input type="text" class="form-control search-on-enter" name="cmUfDsSigla" placeholder="sigla" />
+					</div>
+					<div class="col-sm-2"> 
+						<input type="text" class="form-control search-on-enter" name="cmUfDsNome" placeholder="nome" />
+					</div>
+					<div class="col-sm-1"> 
+						<button type="button" class="btn btn-primary" id="btnBusca13">Pesquisar</button>
+					</div>
+					<div class="col-sm-1">
+						<input type="text" class="form-control" id="buscaValor13" readonly />
+					</div>
+				
+					<div class="col-sm-4">
+						<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+					</div>				
+				</div>
+				<div class="form-group act-view-source-div" style="display: none;"> 
+					<div class="col-sm-2"> </div>
+					<div class="col-sm-6">			
+<pre>
+<code>		
+	//Usando tabelas externas com formulário
+	var ssBuscaComTabelasExternaComFormulario =  new SimpleSearch({
+		url: urlControlador,
+		queryButton: "#btnBusca13",
+		queryId: "#buscaValor13",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		fieldPages: "obj.navegacao.paginas",
+		tableTitles: ["Sigla", "Nome"],
+		tableFields: ["ds_sigla", "ds_nome"],
+		queryForm: "#busca13",
+	});
+</code>		
+</pre>
+					</div>	
+					<div class="col-sm-4"> </div>
+				</div>
+			</form>
+		</div>
+
+		<div class="item-exemplo">
+			<form id="busca14" onsubmit="$('#btnBusca14').click(); return false;">
+				<div class="form-group"> 
+					<label for="busca" class="col-sm-2 control-label"> Com Callback </label>
+				
+					<div class="col-sm-2"> 
+						<input type="text" class="form-control" name="cmUfDsSigla" placeholder="sigla" />
+					</div>
+					<div class="col-sm-2"> 
+						<input type="text" class="form-control" name="cmUfDsNome" placeholder="nome" />
+					</div>
+					<div class="col-sm-1"> 
+						<button type="submit" class="btn btn-primary" id="btnBusca14">Pesquisar</button>
+					</div>
+					<div class="col-sm-1">
+						<input type="text" class="form-control" id="buscaValor14" readonly />
+					</div>
+				
+					<div class="col-sm-4">
+						<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+					</div>				
+				</div>
+				<div class="form-group act-view-source-div" style="display: none;"> 
+					<div class="col-sm-2"> </div>
+					<div class="col-sm-6">			
+<pre>
+<code>		
+	//Usando tabelas externas com formulário e callback
+	var ssBuscaComTabelasExternaComFormularioCallback =  new SimpleSearch({
+		url: urlControlador,
+		queryButton: "#btnBusca14",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		fieldPages: "obj.navegacao.paginas",
+		tableTitles: ["Sigla", "Nome"],
+		tableFields: ["ds_sigla", "ds_nome"],
+		queryForm: "#busca14",
+		onselect: function( row ){ $("#buscaValor14").val(row.id + " " + row.ds_nome); },
+		onreset: function( row ){ $("#buscaValor14").val(""); },
+	});
+</code>		
+</pre>
+					</div>	
+					<div class="col-sm-4"> </div>
+				</div>
+			</form>
+		</div>
+		
+		
+		
+		<legend> Reset </legend>
+		<div class="barraTarefasFormulario">
+		    <p> Para testar o evento de reset dos complementos ou voltar os itens para o valor inicial, clique no botão a seguir: </p>
+	    	<button class="btn btn-default bt_novo" type="button" id="bt_novo">
+		        <span class="glyphicon glyphicon-file"></span> Reset
+		    </button>
+		</div>
+			
+		
+	</div>
+	
+	
+	<br /><br />
+	<hr />
+	
+	<h2 id="documentacao"> Documentação </h2>
+	
+	<legend> Atributos </legend>
+	<table class="table table-striped">
+		<tr>
+			<th>Propriedade</th>
+			<th>Descrição</th>
+			<th>Exemplo</th>
+		</tr>
+		<tr>
+			<td>url</td>
+			<td>Recebe a url que vai fazer a solicitação.</td>
+			<td> url: "/arquivos/controlador/consultarCmUf.php" </td>
+		</tr>
+		<tr>
+			<td>query</td>
+			<td>Seleciona o campo alvo para gerar a pesquisa</td>
+			<td> query: "#inputTextName"  </td>
+		</tr>
+		<tr>
+			<td>queryId</td>
+			<td>Seleciona o campo que vai receber o valor selecionado da pesquisa</td>
+			<td> queryId: "#inputValue"  </td>
+		</tr>
+		<tr>
+			<td>field</td>
+			<td>Informa o nome da propriedade da linha do sql que vai exibir nas linhas da pesquisa </td>
+			<td> field: "ds_nome"  </td>
+		</tr>
+		<tr>
+			<td>fieldId</td>
+			<td>Informa o nome da propriedade da linha do sql que vai usar para popular o valor do 'queryId' </td>
+			<td> fieldId: "id"  </td>
+		</tr>
+		<tr>
+			<td>fieldRecords</td>
+			<td>Informa o caminho o objeto json retornado que contém os registros</td>
+			<td> fieldRecords: "obj.registros"  </td>
+		</tr>
+		<tr>
+			<td>fieldSizePages</td>
+			<td>Informa o caminho da propriedade que informa a quantidade de páginas totais existentes</td>
+			<td> fieldSizePages: "obj.propriedades.qtdPaginasTotal"  </td>
+		</tr>
+		<tr>
+			<td>minLength</td>
+			<td>Informa a quantidade mínima de caracteres para realizar uma busca</td>
+			<td> minLength: 3  </td>
+		</tr>
+		<tr>
+			<td>paramSearch</td>
+			<td>Nome do parametro padrão para pesquisas (Valor padrão: "busca")</td>
+			<td> paramSearch: busca  </td>
+		</tr>
+		<tr>
+			<td>templateField</td>
+			<td>Faz um template com o nome dos atributos para aparecer na lista de itens</td>
+			<td> templateField: "#ds_sigla# - #ds_nome#"  </td>
+		</tr>
+		<tr>
+			<td>templateComplement</td>
+			<td>Faz um template com o nome dos atributos para aparecer na lista de itens em baixo do campo selecionado</td>
+			<td> templateComplement: "#ds_sigla# - #ds_nome#"  </td>
+		</tr>
+		<tr>
+			<td>defaultValue</td>
+			<td>Informa os valores dos registros para iniciar marcados</td>
+			<td>
+				defaultValue: [11, "Minas Gerais"] ou
+				defaultValue: [[19, "Rio de Janeiro"], [8, "Espírito Santo"]]
+			</td>
+		</tr>
+		<tr>
+			<td>data</td>
+			<td>Informa na função de callback os parâmetros enviados antes da pesquisa</td>
+			<td> 
+				data: function(){ return {
+					filtro: "palavraFiltrada"
+				}}  
+			</td>
+		</tr>
+		<tr>
+			<td>queryForm</td>
+			<td>Informa o nome do formulário que vai serializado para passar os parâmetros para a busca</td>
+			<td> queryForm: "#formEstados"  </td>
+		</tr>
+		<tr>
+			<td>queryButton</td>
+			<td>Informa a referência do botão do seletor que vai ser ativado as pesquisas  </td>
+			<td> queryButton: "#btnBuscaEstados"  </td>
+		</tr>
+		<tr>
+			<td>queryContent</td>
+			<td>Informa o container que vai receber o conteúdo da busca</td>
+			<td> queryContent: "#containerExterno"  </td>
+		</tr>
+		<tr>
+			<td>fieldPages</td>
+			<td>Informa o caminho da propriedade do resultado que contém a lista de páginas exibidas na paginação.</td>
+			<td> fieldPages: "obj.navegacao.paginas"  </td>
+		</tr>
+		<tr>
+			<td>inputNames</td>
+			<td>Informa o name dos inputs que estão sendo escolhidos para enviar como paramêtro na requisição</td>
+			<td> inputNames: "estadosSelecionados[]"  </td>
+		</tr>
+		<tr>
+			<td>delaySearch</td>
+			<td>Informa quanto tempo esperar para poder realizar a próxima pesquisa (para evitar muita pesquisa em pouco tempo). (Tempo em milisegundos)</td>
+			<td> delaySearch: 200  </td>
+		</tr>
+		<tr>
+			<td>delayAutoSearch</td>
+			<td>Informa quanto tempo para pesquisar automaticamente. (Tempo em milisegundos)</td>
+			<td> delayAutoSearch: 2500  </td>
+		</tr>
+		<tr>
+			<td>tableTitles</td>
+			<td>Informa o título das colunas que vão ser formadas na tabela</td>
+			<td> tableTitles: ["Sigla", "Nome"]  </td>
+		</tr>
+		<tr>
+			<td>tableFields</td>
+			<td>Informa o nome dos campos do objeto que vão ser exibidos pra preencher a tabela</td>
+			<td> tableFields: ["ds_sigla", "ds_nome"]  </td>
+		</tr>
+		<tr>
+			<td>tableShowSelect</td>
+			<td> Exibe a coluna de selecionar no ínicio da tabela </td>
+			<td> tableShowSelect: true  </td>
+		</tr>
+		<tr>
+			<td>tableKeepOpen</td>
+			<td> Mantem a pesquisa aberta, mesmo após perder o foco. </td>
+			<td> tableKeepOpen: true  </td>
+		</tr>
+		<tr>
+			<td>debug</td>
+			<td> Ativa o modo debug, para exibir as mensagens com informações adicionais no console. </td>
+			<td> debug: true  </td>
+		</tr>
+		
+		<tr>
+			<td>onselect</td>
+			<td>Cria uma função para ser executado ao selecionar algum item da lista</td>
+			<td>onselect: function( row ){ $("#destinoValor").val("Nome: " + row.ds_nome);  </td>
+		</tr>
+		<tr>
+			<td>onreset</td>
+			<td>Cria uma função para ser executado ao resetar o componente</td>
+			<td>onreset: function( row ){ $("#destinoValor").val("");  </td>
+		</tr>
+		<tr>
+			<td>onsuccess</td>
+			<td>Cria uma função para ser executado ao receber a resposta do servidor</td>
+			<td>onsuccess: function( response ){ if (response.status == 'erro') throw Error("Deu erro na resposta do servidor!"); } </td>
+		</tr>
+<!-- 		<tr> -->
+<!-- 			<td></td> -->
+<!-- 			<td></td> -->
+<!-- 			<td></td> -->
+<!-- 		</tr> -->
+	</table>
+	
+	
+
+	<legend> Funções </legend>
+	<table class="table table-striped">
+		<tr>
+			<th>Nome</th>
+			<th>Descrição</th>
+			<th>Exemplo</th>
+		</tr>
+		<tr>
+			<td>disabled()</td>
+			<td>Desativa a pesquisa do item</td>
+			<td>ssEstados.disabled(); </td>
+		</tr>
+		<tr>
+			<td>enabled()</td>
+			<td>Reativa a pesquisa do item</td>
+			<td>ssEstados.enabled(); </td>
+		</tr>
+		<tr>
+			<td>select(id, nome, complemento) <br> 'complemento': opcional </td>
+			<td>Seleciona (ou adiciona) o item com o nome e id informado. </td>
+			<td>ssEstados.select(19, "Rio de Janeiro"); <br> ssEstados.select(19, "Rio de Janeiro", "RJ"); </td>
+		</tr>
+		<tr>
+			<td>reset()</td>
+			<td>Reseta o complemento para seu estado inicial. </td>
+			<td>ssEstados.reset(); </td>
+		</tr>
+	</table>
+	
+	 
+</div>
+
+<!-- Biblioteca -->
+<script src="/recursos/simpleSearch/js/simpleSearch.js" type="application/javascript"></script>
+<script src="/recursos/simpleSearch/doc/index.js" type="application/javascript"></script>
+
+<br/><br/><br/>
+

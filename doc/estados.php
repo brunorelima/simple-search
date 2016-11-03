@@ -1,6 +1,7 @@
 <?php
 // sleep(5);
 
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json; charset=utf-8');
 
 //Recebe parametros
