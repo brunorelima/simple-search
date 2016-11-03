@@ -2,6 +2,7 @@
  * Versão 1.0
  * https://brunorelima.github.io/simple-search/
  */
+
 "use strict";
 
 class SimpleSearch{
