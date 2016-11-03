@@ -135,18 +135,6 @@ $(document).ready(function() {
 		inputNames: "estadosSelecionados[]",
 	});
 
-	//Com container de itens e complemento e iniciado
-	var ssBuscaComItensComplementoIniciado =  new SimpleSearch({
-		url: urlControlador,
-		query: "#busca075",
-		field: "ds_nome",
-// 		fieldId: "id",
-// 		fieldRecords: "obj.registros",
-		inputNames: "estadosSelecionados[]",
-		defaultValue: [[19, "Rio de Janeiro", "Rio de Janeiro - RJ"], [8, "Espírito Santo", "Espírito Santo - ES"]],
-		templateComplement: "#ds_nome# - #ds_sigla#",
-	});
-
 	//Com container de itens iniciado
 	var ssBuscaComItensIniciado =  new SimpleSearch({
 		url: urlControlador,
@@ -160,6 +148,17 @@ $(document).ready(function() {
 // 	ssBuscaComItensIniciado.select(19, "Rio de Janeiro");
 // 	ssBuscaComItensIniciado.select(8, "Espírito Santo");
 
+	//Com container de itens e complemento e iniciado
+	var ssBuscaComItensComplementoIniciado =  new SimpleSearch({
+		url: urlControlador,
+		query: "#busca075",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		inputNames: "estadosSelecionados[]",
+		defaultValue: [[19, "Rio de Janeiro", "Rio de Janeiro - RJ"], [8, "Espírito Santo", "Espírito Santo - ES"]],
+		templateComplement: "#ds_nome# - #ds_sigla#",
+	});
 
 
 	//##############################################
@@ -263,7 +262,7 @@ $(document).ready(function() {
 	
 	$( document ).on( "click", function( event ) {
 		if($(event.target).hasClass("act-view-source-btn")){
-			$( event.target ).closest( ".item-exemplo" ).find(".act-view-source-div").toggle(400);
+			$( event.target ).closest( ".item-exemplo" ).find(".act-view-source-div").toggle(500);
 		}
 		
 	});
