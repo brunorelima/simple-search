@@ -1,9 +1,4 @@
-// 	var urlControlador = "/recursos/simpleSearch/estados.php";
-// 	var urlControlador = "javascripts/estados.js";
-// 	var urlControlador = "/CAD/arquivosExemplo/controlador/consultarCmUf.php";
-	var urlControlador = "https://testevirtualif.iftm.edu.br/TESTES/estados.php";
-
-
+var urlControlador = "http://www.brelzin.com.br/ws/estados.php";
 
 $(document).ready(function() {
 	
@@ -13,8 +8,8 @@ $(document).ready(function() {
 		query: "#inputNome",
 		queryId: "#inputValorId",
 		field: "ds_nome",
-// 			fieldId: "id",
-// 			fieldRecords: "obj.registros",
+//		fieldId: "id",
+//		fieldRecords: "obj.registros",
 	});
 	
 
