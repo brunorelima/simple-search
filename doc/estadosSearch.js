@@ -56,6 +56,7 @@ function _geraRegistros(pagina, termo){
 		if (pagina == 2) return filtrado.slice(10, 20);
 		if (pagina == 3) return filtrado.slice(20);
 	}
+	return filtrado;
 }
 
 function _pesquisa(termo){
