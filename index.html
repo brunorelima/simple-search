@@ -946,6 +946,20 @@
 			<td> Ativa o modo debug, para exibir as mensagens com informações adicionais no console. </td>
 			<td> debug: true  </td>
 		</tr>
+		<tr>
+			<td>whenBlurClear</td>
+			<td> Limpa o conteúdo caso não selecione algo e perca o foco. </td>
+			<td> whenBlurClear: true  </td>
+		</tr>		
+		<tr>
+			<td>response</td>
+			<td> Informa o retorno do objeto json, para não precisar fazer a requisição ajax. </td>
+			<td> 
+				response: function( pagina, termoPesquisado ){
+					return  pesquisaOffline( pagina, termoPesquisado );
+				},
+			</td>
+		</tr>		
 		
 		<tr>
 			<td>onselect</td>
@@ -1014,7 +1028,8 @@
 <!-- </footer> -->
 
 <!-- Biblioteca -->
-<script src="js/simpleSearch.min.js" type="application/javascript"></script>
+<script src="./dist/1.0/js/simpleSearch.js" type="application/javascript"></script>
+<script src="./doc/estadosSearch.js" type="application/javascript"></script>
 <script src="./doc/index.js" type="application/javascript"> </script>
 
 </body>
