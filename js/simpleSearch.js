@@ -1,3 +1,9 @@
+/*!
+ * Versão 1.0a
+ * Última alteração 09/11/2016 15h
+ * https://brunorelima.github.io/simple-search/
+ */
+
 "use strict";
 
 class SimpleSearch{
@@ -56,7 +62,7 @@ class SimpleSearch{
 			console.trace();
 	  		throw Error("Informe o nome do 'query' ou do 'queryButton'. " + this.logNomeClasse);
 	  	} 		
- 		if (propriedades.field == undefined && propriedades.tableFields == undefined){
+ 		if (propriedades.field == undefined && propriedades.tableFields == undefined && propriedades.templateField == undefined){
  			console.trace();
  			throw Error(msgPadrao + "Informe o nome da 'field'. ");
  		}
@@ -64,9 +70,9 @@ class SimpleSearch{
  			console.trace();
  			throw Error(msgPadrao + "Informe o 'fieldRecords'. ");
  		}
- 		if (propriedades.url == undefined){
+ 		if (propriedades.url == undefined && propriedades.response == undefined){
  			console.trace();
- 			throw Error(msgPadrao + "Informe a 'url'. ");
+ 			throw Error(msgPadrao + "Informe a 'url' ou 'response'. ");
  		}
  		if ((!propriedades.queryId || $(propriedades.queryId).length == 0) && !propriedades.inputNames && propriedades.onselect == undefined ) {
  			console.trace();
@@ -101,6 +107,9 @@ class SimpleSearch{
 		this.tableShowSelect = propriedades.tableShowSelect;
 		this.tableKeepOpen = (propriedades.tableKeepOpen == true);
 		this.debug = (propriedades.debug == true);
+		this.whenBlurClear = (propriedades.whenBlurClear == true);
+		this.response = propriedades.response;
+		this.tableLastColumn = propriedades.tableLastColumn;
 		
 		this.data = propriedades.data || function(){ return ""; };
 		this.onselect = propriedades.onselect || function(){};
@@ -333,218 +342,244 @@ class SimpleSearch{
 		this.ultimoParametroPesquisado = params;
 		this.paginaAtual = (pagina != undefined) ? pagina : this.paginaAtual;
 		
-		if (this.ajax){
-			this.ajax.abort();
+		if (this.response){
+			this._trataRepostaServidor( this.response( pagina, $(this.query).val() ) );
+		}
+		else {
+			if (this.ajax){
+				this.ajax.abort();
+			}
+			
+			this.ajax = $.ajax({
+				url: this.url,
+				data: params,
+				dataType: "json",
+				method: this.method,
+				context: this,
+				success: function( response ) {
+					this._trataRepostaServidor( response );
+				  },
+				  error: function(error){				  
+					  if (error.readyState != 0){
+						  console.error(error);					  
+					  }				  
+					  
+					  var msg = "<p> <small> <span class='glyphicon glyphicon-exclamation-sign text-danger'></span> ";
+					  msg += "<strong>Erro na consulta do simpleSearch </strong> </small> </p>";
+					  $(this.queryContent).html(msg);				  
+				  },
+				  beforeSend: function(){
+					  var msg = " <div class='progress' role='progressbar' style='height: 10px;'> <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%' >";
+					  msg += "<span class='sr-only glyphicon glyphicon-hourglass text-primary'><small><strong>Carregando... </strong></small></span>  </div> </div>";
+					  $(this.queryContent).html(msg);				  
+				  },
+				  complete: function(){				 
+					 this.autoIniciarStarted = false;
+					 
+					 var conteudo = $(this.queryContent).html();
+					 if (conteudo.indexOf("progressbar") > 0){
+						 $(this.queryContent).html("");
+					 }
+				  }
+			});
+		}
+	};
+	
+	_trataRepostaServidor( response ){
+		
+		var continuarExecutando = this.onsuccess( response );
+		if ( continuarExecutando ){
+		
+			try{
+				var obj = eval("response." + this.fieldRecords);
+			}catch(err){
+				if (this.debug) console.log(err);
+				if (this.debug) console.log(response);
+				throw Error("Parâmetro configurado para 'fieldRecords' incorreto. Confira a resposta do servidor.");
+			}
+			
+			if (obj == undefined){
+				console.error("Objeto de registros indefinido. Confira se o argumento de 'fieldRecords' está correto. " + this.logNomeClasse);
+				return;
+			}
+			
+			this.arrayRegistros = (this.fieldRecords && obj) ? obj : response.obj;
+			
+			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.field] == undefined){
+				console.error("Valor da 'field' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
+			}
+			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.fieldId] == undefined){
+				console.error("Valor da 'fieldId' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
+			}
+			
+			
+			if (this.arrayRegistros != null && this.arrayRegistros.length > 0){
+				var htmlSaida = "";
+				
+				if (this.tableKeepOpen == true){
+					htmlSaida += "<div> ";
+					htmlSaida += "  <div class='glyphicon glyphicon-remove text-danger pull-right acao-fechar' aria-hidden='true' title='Fechar tabela' style='cursor: pointer;'> </div> ";
+//					htmlSaida += "  <button class='btn btn-default btn-xs pull-right' type='button'> <span class='glyphicon glyphicon-remove text-danger' aria-hidden='true'></span>  </button> ";
+				}
+				
+				if (!this.tableFields){
+				
+    				htmlSaida += "<ul class='list-group " + this.classResultadoPesquisa + "' style='margin-bottom: 0;'>";
+    				this.arrayRegistros.forEach(function(item, index){
+
+    					//Complemento pra verificar se tem que desativar a linha ou não
+    					var complementoLinha = (this.inputNames && ($(this.destinoItensSelecionados + " input[value='" + item[this.fieldId] + "']").length != 0)) ? "disabled" : "";    					
+    					htmlSaida += "<li class='list-group-item linhaSs " + complementoLinha + "' style='cursor: pointer;'>";
+    					
+    					if (this.templateField){
+    						htmlSaida += this._atualizaValoresTemplate(item, this.templateField);
+    					}
+    					else {	    						
+    						htmlSaida += item[this.field];
+    					}
+    					
+    					htmlSaida += " </li>";
+    				}, this);
+    				htmlSaida += "</ul>";	    				
+    				
+				}
+				else {
+					htmlSaida += "<table class='table table-bordered table-striped table-hover " + this.classResultadoPesquisa + "' style='margin-bottom: 0;'>";
+					
+					//Percorrendo header
+					if (this.tableTitles){
+						htmlSaida += "<tr>";
+						
+						if (this.tableShowSelect){
+							htmlSaida += "<td width='42px'> </td>";
+						}
+						
+						this.tableTitles.forEach(function(titulo, index){
+							htmlSaida += "<th> " + titulo + " </th>";
+						});
+						
+						if (this.tableLastColumn){
+							htmlSaida += "<th></th>";
+						}
+						
+						htmlSaida += "</tr>";    						
+					}
+						
+					//Percorrendo registros    						
+					this.arrayRegistros.forEach(function(registro, index){
+						htmlSaida += "<tr class='linhaSs' style='cursor:pointer'>";
+						
+						if (this.tableShowSelect){
+							htmlSaida += "<td class='text-center'> <button type='button' class='btn btn-default btn-xs'> <span class='glyphicon glyphicon-ok'></span> </button> </td>";
+						}
+						
+						this.tableFields.forEach(function(col, index){
+							htmlSaida += "<td> " + registro[col] + " </td>";    								
+						}, this);
+						
+						if (this.tableLastColumn){
+							if (this.tableLastColumn ==='function' || this.tableLastColumn instanceof Function){
+								htmlSaida += "<td> " + this._atualizaValoresTemplate(registro, this.tableLastColumn()) + " </td>";
+							}
+//							if (typeof this.tableLastColumn === 'string' || this.tableLastColumn instanceof String){
+							else {
+								htmlSaida += "<td> " + this._atualizaValoresTemplate(registro, this.tableLastColumn) + " </td>";								
+							}
+						}
+						
+						htmlSaida += "</tr>";
+					}, this);
+						
+					htmlSaida += "</table>";
+					
+				}
+				
+				
+				// Controle das paginas
+				var qtdPaginasTotal = eval("response." + this.fieldSizePages) || -1;
+				var complementoBotaoAnterior = (this.paginaAtual == 1) ? "disabled" : "";
+				var complementoBotaoProximo = (this.paginaAtual == qtdPaginasTotal) ? "disabled" : "";
+				
+				
+				// Adiciona paginação
+				if (qtdPaginasTotal && qtdPaginasTotal > 1 ){
+					this.paginaAtual = (this.paginaAtual > (qtdPaginasTotal + 1)) ? (qtdPaginasTotal + 1) : this.paginaAtual;
+					
+					var dadosPaginacao = null;
+					
+					try{
+						dadosPaginacao = (this.fieldPages) ? eval("response." + this.fieldPages) : null;
+					}catch(error){
+						console.warn("Erro ao usar o parâmetro 'fieldPages': " + this.fieldPages);
+					}
+					
+					if (dadosPaginacao){
+						htmlSaida += "<div class='btn-group' role='group'> <div class='text-center'> ";
+						htmlSaida += " <ul class='pagination'> ";
+    					
+    					if (dadosPaginacao){
+    						dadosPaginacao.forEach(function(item, index){
+    							var linhaTemplate = "  <li class='#active#' data-pagina='#pagina#' ><a href='javascript:void(0)'>#legenda#</a></li> ";
+    							htmlSaida += this._atualizaValoresTemplate(item, linhaTemplate);
+    						}, this);
+    					}
+    					
+    					htmlSaida += " </ul>  ";    					
+    					htmlSaida += "</div></div>";
+					}
+					else {
+    					htmlSaida += "<div class='btn-group btn-group-justified' role='group'>";    				
+    					htmlSaida += "<div class='btn-group' role='group'> <button type='button' class='btn btn-primary clk-btn-prev' " + complementoBotaoAnterior + "> Anterior </button>  </div>";
+    					htmlSaida += "<div class='btn-group' role='group'> <button type='button' class='btn btn-primary clk-btn-next' " + complementoBotaoProximo + "> Próxima </button>  </div>";    					
+    					htmlSaida += "</div>";    						
+					}
+					
+				} 
+				
+				if (this.queryContentExterno){
+					htmlSaida += "</div> ";
+				}
+				
+				$(this.queryContent).html(htmlSaida);
+				
+				if (this.tableKeepOpen == true){
+					$(this.queryContent).undelegate(".acao-fechar", "click");
+    				$(this.queryContent).delegate(".acao-fechar", "click", this._limparConteudo.bind(this));	    					
+				}
+				
+				$(this.queryContent).undelegate(".linhaSs", "click");				
+				$(this.queryContent).delegate(".linhaSs", "click", this._acaoClickMouse.bind(this));
+				
+				$(this.resultadoPesquisa).undelegate(".linhaSs", "mouseover");
+				$(this.resultadoPesquisa).delegate(".linhaSs", "mouseover", this._acaoMouseOver.bind(this));
+
+				$(this.queryContent).undelegate(".clk-btn-prev", "click");
+				$(this.queryContent).delegate(".clk-btn-prev", "click", this._voltaPagina.bind(this));
+				
+				$(this.queryContent).undelegate(".clk-btn-next", "click");
+				$(this.queryContent).delegate(".clk-btn-next", "click", this._proximaPagina.bind(this));
+				
+				$(this.queryContent).undelegate(".pagination li", "click");				
+				$(this.queryContent).delegate(".pagination li", "click", $.proxy(function (event) {
+					var indexPaginacao = $(this.queryContent + " .pagination li").index( $(event.currentTarget) );
+					if (indexPaginacao >= 0){
+						var domPaginaPaginacao = $(this.queryContent + " .pagination li")[indexPaginacao];
+						var paginaPaginacao = $(domPaginaPaginacao).data("pagina");
+						this._pesquisar(paginaPaginacao);
+					}
+		    	},this));    				
+				
+			}
+			else {
+				var msg = "<small><p> <span class='glyphicon glyphicon-info-sign text-primary'></span> ";
+				msg += "<strong>Nenhum resultado encontrado para o termo informado. </strong></p></small>";
+				$(this.queryContent).html( msg );
+				this.paginaAtual = ( this.paginaAtual - 1);
+			}
+			$(this.query).focus();
 		}
 		
-		this.ajax = $.ajax({
-			url: this.url,
-			data: params,
-			dataType: "json",
-			method: this.method,
-			context: this,
-			success: function( response ) {				
-				var continuarExecutando = this.onsuccess( response );
-				if ( continuarExecutando ){
-				
-					try{
-						var obj = eval("response." + this.fieldRecords);
-					}catch(err){
-						if (this.debug) console.log(err);
-						if (this.debug) console.log(response);
-						throw Error("Parâmetro configurado para 'fieldRecords' incorreto. Confira a resposta do servidor.");
-					}
-					
-					if (obj == undefined){
-						console.error("Objeto de registros indefinido. Confira se o argumento de 'fieldRecords' está correto. " + this.logNomeClasse);
-						return;
-					}
-					
-					this.arrayRegistros = (this.fieldRecords && obj) ? obj : response.obj;
-	    			
-	    			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.field] == undefined){
-						console.error("Valor da 'field' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
-					}
-	    			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.fieldId] == undefined){
-	    				console.error("Valor da 'fieldId' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
-	    			}
-	    			
-	    			
-	    			if (this.arrayRegistros != null && this.arrayRegistros.length > 0){
-	    				var htmlSaida = "";
-	    				
-	    				if (this.tableKeepOpen == true){
-	    					htmlSaida += "<div> ";
-	    					htmlSaida += "  <div class='glyphicon glyphicon-remove text-danger pull-right acao-fechar' aria-hidden='true' title='Fechar tabela' style='cursor: pointer;'> </div> ";
-//	    					htmlSaida += "  <button class='btn btn-default btn-xs pull-right' type='button'> <span class='glyphicon glyphicon-remove text-danger' aria-hidden='true'></span>  </button> ";
-	    				}
-	    				
-	    				if (!this.tableFields){
-	    				
-		    				htmlSaida += "<ul class='list-group " + this.classResultadoPesquisa + "' style='margin-bottom: 0;'>";
-		    				this.arrayRegistros.forEach(function(item, index){
-		
-		    					//Complemento pra verificar se tem que desativar a linha ou não
-		    					var complementoLinha = (this.inputNames && ($(this.destinoItensSelecionados + " input[value='" + item[this.fieldId] + "']").length != 0)) ? "disabled" : "";    					
-		    					htmlSaida += "<li class='list-group-item linhaSs " + complementoLinha + "' style='cursor: pointer;'>";
-		    					
-		    					if (this.templateField){
-		    						htmlSaida += this._atualizaValoresTemplate(item, this.templateField);
-		    					}
-		    					else {	    						
-		    						htmlSaida += item[this.field];
-		    					}
-		    					
-		    					htmlSaida += " </li>";
-		    				}, this);
-		    				htmlSaida += "</ul>";	    				
-		    				
-	    				}
-	    				else {
-	    					htmlSaida += "<table class='table table-bordered table-striped table-hover " + this.classResultadoPesquisa + "' style='margin-bottom: 0;'>";
-	    					
-	    					//Percorrendo header
-	    					if (this.tableTitles){
-	    						htmlSaida += "<tr>";
-	    						
-	    						if (this.tableShowSelect){
-									htmlSaida += "<td width='42px'> </td>";
-								}
-	    						
-	    						this.tableTitles.forEach(function(titulo, index){
-	    							htmlSaida += "<th> " + titulo + " </th>";
-	    						});
-	    						htmlSaida += "</tr>";    						
-	    					}
-	    						
-	    					//Percorrendo registros    						
-							this.arrayRegistros.forEach(function(registro, index){
-								htmlSaida += "<tr class='linhaSs' style='cursor:pointer'>";
-								
-								if (this.tableShowSelect){
-									htmlSaida += "<td class='text-center'> <button type='button' class='btn btn-default btn-xs'> <span class='glyphicon glyphicon-ok'></span> </button> </td>";
-								}
-								
-								this.tableFields.forEach(function(col, index){
-									htmlSaida += "<td> " + registro[col] + " </td>";    								
-								}, this);
-								htmlSaida += "</tr>";
-	    					}, this);
-	    						
-	    					htmlSaida += "</table>";
-	    					
-	    				}
-	    				
-	    				
-	    				// Controle das paginas
-	    				var qtdPaginasTotal = eval("response." + this.fieldSizePages) || -1;
-	    				var complementoBotaoAnterior = (this.paginaAtual == 1) ? "disabled" : "";
-	    				var complementoBotaoProximo = (this.paginaAtual == qtdPaginasTotal) ? "disabled" : "";
-	    				
-	    				
-	    				// Adiciona paginação
-	    				if (qtdPaginasTotal && qtdPaginasTotal > 1 ){
-	    					this.paginaAtual = (this.paginaAtual > (qtdPaginasTotal + 1)) ? (qtdPaginasTotal + 1) : this.paginaAtual;
-	    					
-	    					var dadosPaginacao = null;
-	    					
-	    					try{
-	    						dadosPaginacao = (this.fieldPages) ? eval("response." + this.fieldPages) : null;
-	    					}catch(error){
-	    						console.warn("Erro ao usar o parâmetro 'fieldPages': " + this.fieldPages);
-	    					}
-	    					
-	    					if (dadosPaginacao){
-	    						htmlSaida += "<div class='btn-group' role='group'> <div class='text-center'> ";
-	    						htmlSaida += " <ul class='pagination'> ";
-		    					
-		    					if (dadosPaginacao){
-		    						dadosPaginacao.forEach(function(item, index){
-		    							var linhaTemplate = "  <li class='#active#' data-pagina='#pagina#' ><a href='#'>#legenda#</a></li> ";
-		    							htmlSaida += this._atualizaValoresTemplate(item, linhaTemplate);
-		    						}, this);
-		    					}
-		    					
-		    					htmlSaida += " </ul>  ";    					
-		    					htmlSaida += "</div></div>";
-	    					}
-	    					else {
-	        					htmlSaida += "<div class='btn-group btn-group-justified' role='group'>";    				
-	        					htmlSaida += "<div class='btn-group' role='group'> <button type='button' class='btn btn-primary clk-btn-prev' " + complementoBotaoAnterior + "> Anterior </button>  </div>";
-	        					htmlSaida += "<div class='btn-group' role='group'> <button type='button' class='btn btn-primary clk-btn-next' " + complementoBotaoProximo + "> Próxima </button>  </div>";    					
-	        					htmlSaida += "</div>";    						
-	    					}
-	    					
-	    					
-	    				} 
-	    				
-	    				if (this.queryContentExterno){
-	    					htmlSaida += "</div> ";
-	    				}
-	    				
-	    				$(this.queryContent).html(htmlSaida);
-	    				
-	    				if (this.tableKeepOpen == true){
-	    					$(this.queryContent).undelegate(".acao-fechar", "click");
-		    				$(this.queryContent).delegate(".acao-fechar", "click", this._limparConteudo.bind(this));	    					
-	    				}
-	    				
-	    				$(this.queryContent).undelegate(".linhaSs", "click");				
-	    				$(this.queryContent).delegate(".linhaSs", "click", this._acaoClickMouse.bind(this));
-	    				
-	    				$(this.resultadoPesquisa).undelegate(".linhaSs", "mouseover");
-	    				$(this.resultadoPesquisa).delegate(".linhaSs", "mouseover", this._acaoMouseOver.bind(this));
-	
-	    				$(this.queryContent).undelegate(".clk-btn-prev", "click");
-	    				$(this.queryContent).delegate(".clk-btn-prev", "click", this._voltaPagina.bind(this));
-	    				
-	    				$(this.queryContent).undelegate(".clk-btn-next", "click");
-	    				$(this.queryContent).delegate(".clk-btn-next", "click", this._proximaPagina.bind(this));
-	    				
-	    				$(this.queryContent).undelegate(".pagination li", "click");				
-	    				$(this.queryContent).delegate(".pagination li", "click", $.proxy(function (event) {
-	    					var indexPaginacao = $(this.queryContent + " .pagination li").index( $(event.currentTarget) );
-	    					if (indexPaginacao >= 0){
-	    						var domPaginaPaginacao = $(this.queryContent + " .pagination li")[indexPaginacao];
-	    						var paginaPaginacao = $(domPaginaPaginacao).data("pagina");
-	    						this._pesquisar(paginaPaginacao);
-	    					}
-	    		    	},this));    				
-	    				
-	    			}
-	    			else {
-	    				var msg = "<small><p> <span class='glyphicon glyphicon-info-sign text-primary'></span> ";
-	    				msg += "<strong>Nenhum resultado encontrado para o termo informado. </strong></p></small>";
-	    				$(this.queryContent).html( msg );
-	    				this.paginaAtual = ( this.paginaAtual - 1);
-	    			}
-	    			$(this.query).focus();
-				}
-			  },
-			  error: function(error){				  
-				  if (error.readyState != 0){
-					  console.error(error);					  
-				  }				  
-				  
-				  var msg = "<p> <small> <span class='glyphicon glyphicon-exclamation-sign text-danger'></span> ";
-				  msg += "<strong>Erro na consulta do simpleSearch </strong> </small> </p>";
-				  $(this.queryContent).html(msg);				  
-			  },
-			  beforeSend: function(){
-				  var msg = " <div class='progress' role='progressbar' style='height: 10px;'> <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%' >";
-				  msg += "<span class='sr-only glyphicon glyphicon-hourglass text-primary'><small><strong>Carregando... </strong></small></span>  </div> </div>";
-				  $(this.queryContent).html(msg);				  
-			  },
-			  complete: function(){				 
-				 this.autoIniciarStarted = false;
-				 
-				 var conteudo = $(this.queryContent).html();
-				 if (conteudo.indexOf("progressbar") > 0){
-					 $(this.queryContent).html("");
-				 }
-			  }
-		});
-	};
+	}
 	
 	_atualizaValoresTemplate(row, templateField){
 		$.each(row, function(campo, valor) {
@@ -740,6 +775,10 @@ class SimpleSearch{
 		this.ultimoParametroPesquisado = "";
 		this.ultimaPalavraPesquisada = "-1";
 		this.paginaAtual = 0;
+		
+		if (this.whenBlurClear){
+			$(this.query).val("");
+		}		
 	};
 	
 	reset(){
@@ -825,6 +864,10 @@ class SimpleSearch{
 		else if (this.queryButton){
 			$(this.queryButton).removeAttr( "disabled");
 		}
+	};
+	
+	focus(){
+		$(this.query).focus();
 	};
   
 };

@@ -137,7 +137,7 @@
 					<pre>
 <code>		
 	var ssBuscaBasico =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca0",
 		queryId: "#buscaValor0",
 		field: "ds_nome",
@@ -174,13 +174,12 @@
 					<pre>
 <code>		
 	var ssBuscaEnviandoParametros =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca01",
 		queryId: "#buscaValor01",
 		field: "ds_nome",
 // 		fieldId: "id",
 // 		fieldRecords: "obj.registros",
-		fieldSizePages: "obj.propriedades.qtdPaginasTotal",
 		data: function(){ return {
 			filtro: "palavraFiltrada"
 		} },
@@ -215,7 +214,7 @@
 					<pre>
 <code>		
 	var ssBuscaMinimoParametros =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca02",
 		queryId: "#buscaValor02",
 		field: "ds_nome",
@@ -240,7 +239,7 @@
 					<input type="text" class="form-control" id="buscaValor021" readonly />
 				</div>
 				<div class="col-sm-4">
-					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+						<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
 				</div>
 			</div>
 			
@@ -250,7 +249,7 @@
 					<pre>
 <code>		
 	var ssBuscaComTemporizador =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca021",
 		queryId: "#buscaValor021",
 		field: "ds_nome",
@@ -285,7 +284,7 @@
 					<pre>
 <code>		
 	var ssBuscaComComplemento =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca022",
 		queryId: "#buscaValor022",
 		field: "ds_nome",
@@ -320,7 +319,7 @@
 					<pre>
 <code>		
 	var ssBuscaComTemplate =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca03",
 		queryId: "#buscaValor03",
 		field: "ds_nome",
@@ -354,7 +353,7 @@
 				<pre>
 <code>		
 	var ssBuscaComCallback =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca04",
 		queryId: "#buscaValor04",
 		field: "ds_nome",
@@ -391,7 +390,7 @@
 <code>		
 	//Inicializado
 	var ssBuscaInicializado =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca05",
 		queryId: "#buscaValor05",
 		field: "ds_nome",
@@ -427,7 +426,7 @@
 <code>		
 	//Bloqueado
 	var ssBuscaBloqueado =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca06",
 		queryId: "#buscaValor06",
 		field: "ds_nome",
@@ -464,7 +463,7 @@
 <code>		
 	//Com container de itens
 	var ssBuscaComItens =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca07",
 		field: "ds_nome",
 // 		fieldId: "id",
@@ -496,7 +495,7 @@
 <code>		
 	//Com container de itens iniciado
 	var ssBuscaComItensIniciado =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca08",
 		field: "ds_nome",
 // 		fieldId: "id",
@@ -530,7 +529,7 @@
 <code>		
 	//Com container de itens e complemento e iniciado
 	var ssBuscaComItensComplementoIniciado =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca075",
 		field: "ds_nome",
 // 		fieldId: "id",
@@ -569,7 +568,7 @@
 <code>		
 	//Usando tabelas
 	var ssBuscaComTabelas =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca10",
 		queryId: "#buscaValor10",
 		field: "ds_nome",
@@ -605,7 +604,7 @@
 <code>		
 	//Usando tabelas com paginação
 	var ssBuscaTabelasComPaginacao =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca11",		
 		queryId: "#buscaValor11",	
 		field: "ds_nome",
@@ -643,7 +642,7 @@
 <code>		
 	//Usando tabelas externas
 	var ssBuscaComTabelasExterna =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca12",
 		queryId: "#buscaValor12",
 		field: "ds_nome",
@@ -694,7 +693,7 @@
 <code>		
 	//Usando tabelas externas com formulário
 	var ssBuscaComTabelasExternaComFormulario =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		queryButton: "#btnBusca13",
 		queryId: "#buscaValor13",
 		field: "ds_nome",
@@ -742,7 +741,7 @@
 <code>		
 	//Usando tabelas externas com formulário e callback
 	var ssBuscaComTabelasExternaComFormularioCallback =  new SimpleSearch({
-		url: urlControlador,
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		queryButton: "#btnBusca14",
 		field: "ds_nome",
 // 		fieldId: "id",
@@ -767,7 +766,7 @@
 		<legend> Reset </legend>
 		<div class="barraTarefasFormulario">
 		    <p> Para testar o evento de reset dos complementos ou voltar os itens para o valor inicial, clique no botão a seguir: </p>
-	    	<button class="btn btn-default bt_novo" type="button" id="bt_novo">
+	    	<button class="btn btn-default bt_novo" type="button" id="bt_reset">
 		        <span class="glyphicon glyphicon-file"></span> Reset
 		    </button>
 		</div>
@@ -916,20 +915,43 @@
 			<td> tableKeepOpen: true  </td>
 		</tr>
 		<tr>
+			<td>tableLastColumn</td>
+			<td> Adiciona o conteúdo na última coluna. </td>
+			<td> 
+				tableLastColumn: "&#60;button&#62; #ds_nome# &#60;/button&#62;", 
+				<i>ou</i> <br>
+				tableLastColumn: function(){ return "&#60;button&#62; #ds_nome# &#60;/button&#62;"; },  
+			</td>
+		</tr>
+		<tr>
 			<td>debug</td>
 			<td> Ativa o modo debug, para exibir as mensagens com informações adicionais no console. </td>
 			<td> debug: true  </td>
 		</tr>
+		<tr>
+			<td>whenBlurClear</td>
+			<td> Limpa o conteúdo caso não selecione algo e perca o foco. </td>
+			<td> whenBlurClear: true  </td>
+		</tr>		
+		<tr>
+			<td>response</td>
+			<td> Informa o retorno do objeto json, para não precisar fazer a requisição ajax. </td>
+			<td> 
+				response: function( pagina, termoPesquisado ){
+					return  pesquisaOffline( pagina, termoPesquisado );
+				},
+			</td>
+		</tr>		
 		
 		<tr>
 			<td>onselect</td>
 			<td>Cria uma função para ser executado ao selecionar algum item da lista</td>
-			<td>onselect: function( row ){ $("#destinoValor").val("Nome: " + row.ds_nome);  </td>
+			<td>onselect: function( row ){ $("#destinoValor").val("Nome: " + row.ds_nome); } </td>
 		</tr>
 		<tr>
 			<td>onreset</td>
 			<td>Cria uma função para ser executado ao resetar o componente</td>
-			<td>onreset: function( row ){ $("#destinoValor").val("");  </td>
+			<td>onreset: function( row ){ $("#destinoValor").val(""); }  </td>
 		</tr>
 		<tr>
 			<td>onsuccess</td>
@@ -972,14 +994,23 @@
 			<td>Reseta o complemento para seu estado inicial. </td>
 			<td>ssEstados.reset(); </td>
 		</tr>
+		<tr>
+			<td>focus()</td>
+			<td>Seta foco para o elemento. </td>
+			<td>ssEstados.focus(); </td>
+		</tr>
 	</table>
+	
+	
 	
 	 
 </div>
 
+<br/><br/><br/>
+  
 <!-- Biblioteca -->
 <script src="/recursos/simpleSearch/js/simpleSearch.js" type="application/javascript"></script>
+<script src="/recursos/simpleSearch/doc/estadosSearch.js" type="application/javascript"></script>
 <script src="/recursos/simpleSearch/doc/index.js" type="application/javascript"></script>
 
-<br/><br/><br/>
 
