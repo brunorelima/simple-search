@@ -1,5 +1,6 @@
 /*!
- * Versão 1.0
+ * Versão 1.0a
+ * Última alteração 09/11/2016 15h
  * https://brunorelima.github.io/simple-search/
  */
 
@@ -61,7 +62,7 @@ class SimpleSearch{
 			console.trace();
 	  		throw Error("Informe o nome do 'query' ou do 'queryButton'. " + this.logNomeClasse);
 	  	} 		
- 		if (propriedades.field == undefined && propriedades.tableFields == undefined){
+ 		if (propriedades.field == undefined && propriedades.tableFields == undefined && propriedades.templateField == undefined){
  			console.trace();
  			throw Error(msgPadrao + "Informe o nome da 'field'. ");
  		}
@@ -108,6 +109,7 @@ class SimpleSearch{
 		this.debug = (propriedades.debug == true);
 		this.whenBlurClear = (propriedades.whenBlurClear == true);
 		this.response = propriedades.response;
+		this.tableLastColumn = propriedades.tableLastColumn;
 		
 		this.data = propriedades.data || function(){ return ""; };
 		this.onselect = propriedades.onselect || function(){};
@@ -455,6 +457,11 @@ class SimpleSearch{
 						this.tableTitles.forEach(function(titulo, index){
 							htmlSaida += "<th> " + titulo + " </th>";
 						});
+						
+						if (this.tableLastColumn){
+							htmlSaida += "<th></th>";
+						}
+						
 						htmlSaida += "</tr>";    						
 					}
 						
@@ -469,6 +476,17 @@ class SimpleSearch{
 						this.tableFields.forEach(function(col, index){
 							htmlSaida += "<td> " + registro[col] + " </td>";    								
 						}, this);
+						
+						if (this.tableLastColumn){
+							if (this.tableLastColumn ==='function' || this.tableLastColumn instanceof Function){
+								htmlSaida += "<td> " + this._atualizaValoresTemplate(registro, this.tableLastColumn()) + " </td>";
+							}
+//							if (typeof this.tableLastColumn === 'string' || this.tableLastColumn instanceof String){
+							else {
+								htmlSaida += "<td> " + this._atualizaValoresTemplate(registro, this.tableLastColumn) + " </td>";								
+							}
+						}
+						
 						htmlSaida += "</tr>";
 					}, this);
 						
@@ -846,6 +864,10 @@ class SimpleSearch{
 		else if (this.queryButton){
 			$(this.queryButton).removeAttr( "disabled");
 		}
+	};
+	
+	focus(){
+		$(this.query).focus();
 	};
   
 };

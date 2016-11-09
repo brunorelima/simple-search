@@ -1,5 +1,4 @@
 var urlControlador = "http://www.brelzin.com.br/ws/estados.php";
-//var urlControlador = "https://testevirtualif.iftm.edu.br/TESTES/estados.php"; 
 
 
 $(document).ready(function() {
@@ -42,7 +41,6 @@ $(document).ready(function() {
 		field: "ds_nome",
 // 		fieldId: "id",
 // 		fieldRecords: "obj.registros",
-		fieldSizePages: "obj.propriedades.qtdPaginasTotal",
 		data: function(){ return {
 			filtro: "palavraFiltrada"
 		} },
@@ -280,7 +278,7 @@ $(document).ready(function() {
 		tableFields: ["ds_sigla", "ds_nome"],
 		queryForm: "#busca14",
 		onselect: function( row ){ $("#buscaValor14").val(row.id + " " + row.ds_nome); },
-		onreset: function( row ){ $("#buscaValor14").val(""); },
+		onreset: function( row ){ $("#buscaValor14").val(""); },		
 	});
 
 
@@ -304,9 +302,11 @@ $(document).ready(function() {
 		ssBuscaComTabelasExterna.reset();
 		ssBuscaComTabelasExternaComFormulario.reset();
 		ssBuscaComTabelasExternaComFormularioCallback.reset();
+		
+		$( ".item-exemplo .act-view-source-div" ).hide(500);
 	}
 	
-	$("#bt_novo").click( limparSs );
+	$("#bt_reset").click( limparSs );
 	
 	$( document ).on( "click", function( event ) {
 		if($(event.target).hasClass("act-view-source-btn")){
