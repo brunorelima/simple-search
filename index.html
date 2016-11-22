@@ -506,6 +506,39 @@
 
 		<div class="item-exemplo">
 			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> Com vários itens mantendo aberto </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="busca072" />
+				</div>			
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>				
+			</div>
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+<pre>
+<code>		
+	//Com container de itens
+	var ssBuscaComItens =  new SimpleSearch({
+		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
+		query: "#busca072",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		inputNames: "estadosSelecionados[]",
+		whenSelectKeepOpen: true,
+	});
+</code>		
+</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>
+		</div>
+
+
+		<div class="item-exemplo">
+			<div class="form-group"> 
 				<label for="busca" class="col-sm-2 control-label"> Com vários itens inicializado</label> 
 				<div class="col-sm-5"> 
 					<input type="text" class="form-control" id="busca08" />
@@ -941,6 +974,11 @@
 			<td> tableKeepOpen: true  </td>
 		</tr>
 		<tr>
+			<td>tableShowClose</td>
+			<td> Mostra botão para fechar a tabela. </td>
+			<td> tableShowClose: true  </td>
+		</tr>
+		<tr>
 			<td>tableLastColumn</td>
 			<td> Adiciona o conteúdo na última coluna. </td>
 			<td> 
@@ -958,6 +996,11 @@
 			<td>whenBlurClear</td>
 			<td> Limpa o conteúdo caso não selecione algo e perca o foco. </td>
 			<td> whenBlurClear: true  </td>
+		</tr>
+		<tr>
+			<td>whenSelectKeepOpen</td>
+			<td> Quando seleciona o item, mantem a caixa aberta (usado com múltiplos itens). </td>
+			<td> whenSelectKeepOpen: true  </td>
 		</tr>		
 		<tr>
 			<td>response</td>
