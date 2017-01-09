@@ -1,5 +1,6 @@
 /*!
  * Versão 1.0a
+ * Última alteração: 13/01/2017 
  * https://brunorelima.github.io/simple-search/
  */
 
@@ -26,7 +27,6 @@ var SimpleSearch =
 		  		fieldRecords: "obj.registros",
 		  		fieldSizePages: "obj.propriedades.qtdPaginasTotal",
 //		  		fieldPages: "obj.navegacao.paginas",
-		  		paramSearch: "busca",
 		  		delaySearch: 200,
 		    	onsuccess: function(response){
 					if (response.status == 'erro'){
@@ -99,7 +99,7 @@ var SimpleSearch =
 		this.queryButton = propriedades.queryButton;
 		this.queryForm = propriedades.queryForm;
 		this.fieldPages = propriedades.fieldPages;
-		this.paramSearch = propriedades.paramSearch;
+		this.paramSearch = propriedades.paramSearch || $( this.query ).attr("name") || "busca";
 		this.delayAutoSearch = propriedades.delayAutoSearch || -1;
 		this.delaySearch = propriedades.delaySearch;
 		this.autoIniciarStarted = false;
