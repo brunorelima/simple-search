@@ -1,12 +1,12 @@
 /*!
  * Versão 1.0a
- * Última alteração 22/11/2016 16h
  * https://brunorelima.github.io/simple-search/
  */
 
 "use strict";
 
-class SimpleSearch{
+var SimpleSearch =
+ class SimpleSearch{
 	
 	static getIdentificador(){
 		if (this.identificador == null){
