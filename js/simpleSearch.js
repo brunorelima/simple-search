@@ -1,12 +1,12 @@
 /*!
  * Versão 1.0a
- * Última alteração 09/11/2016 15h
  * https://brunorelima.github.io/simple-search/
  */
 
 "use strict";
 
-class SimpleSearch{
+var SimpleSearch =
+ class SimpleSearch{
 	
 	static getIdentificador(){
 		if (this.identificador == null){
@@ -110,6 +110,8 @@ class SimpleSearch{
 		this.whenBlurClear = (propriedades.whenBlurClear == true);
 		this.response = propriedades.response;
 		this.tableLastColumn = propriedades.tableLastColumn;
+		this.tableShowClose = propriedades.tableShowClose;
+		this.whenSelectKeepOpen = propriedades.whenSelectKeepOpen;
 		
 		this.data = propriedades.data || function(){ return ""; };
 		this.onselect = propriedades.onselect || function(){};
@@ -136,7 +138,7 @@ class SimpleSearch{
 			$(this.query).after("<span class='input-group-addon btn '>  <span class='glyphicon glyphicon-search text-primary'></span> </span> ");
 			
 			if (this.templateComplement){
-				$(this.containerAutoComplete).append("<div class='" + this.classComplemento + "'></div>");
+				$(this.query).after("<div class='" + this.classComplemento + " form-control' style='display: none; height: auto; resize: none;' readonly ></div>");
 			}
 			
 			$(this.containerAutoComplete).append("<div class='" + this.classDestinoConteudo + "'></div>");
@@ -207,6 +209,7 @@ class SimpleSearch{
 					if(
 							!$(event.target).hasClass("clk-btn-next") &&
 							!$(event.target).hasClass("clk-btn-prev") &&
+							!$(event.target).attr("data-pagina") &&
 							$(event.target).closest(this.containerAutoComplete).length == 0
 						) {
 			        	if (this.tableKeepOpen != true){
@@ -217,18 +220,23 @@ class SimpleSearch{
 			},this));
 			
 			// Se clicar no botão de pesquisa executa ação
-			$(this.query).next().click($.proxy(function () {
+			$(this.query).parent().find(".input-group-addon").click($.proxy(function () {
 				this._acaoBotaoPesquisarOuDesbloquear();
 			},this));
 			
+			var destinoTargetDoubleClick = (this.templateComplement) ? this.containerAutoComplete + " ." + this.classComplemento : this.query;
 			
 	    	// Adiciona eventos
-	    	$(this.query).dblclick($.proxy(function () {
+	    	$(destinoTargetDoubleClick).dblclick($.proxy(function () {
 	    		this._desbloquear( true );
 	    		this._setComplemento( "" );
+	    		
+	    		$(this.query).show();
+				$(this.containerAutoComplete + " ." + this.classComplemento ).hide();
+				$(this.query).focus();
 	    	},this)); 	
 
-	    	$(this.query).next().addClass("btn");
+	    	$(this.query).parent().find(".glyphicon").parent().addClass("btn");
 	    	
 		 }
 		 
@@ -250,9 +258,10 @@ class SimpleSearch{
 	 
 	 _removeEventos(){
 		 if (this.query){
-			 $(this.query).next().unbind( "click" );
 			 $(this.query).unbind( "dblclick" );
-			 $(this.query).next().removeClass("btn");			 
+			 $(this.query).parent().find(".input-group-addon").unbind( "click" );
+			 $(this.query).parent().find(".glyphicon").unbind( "click" );
+			 $(this.query).parent().find(".glyphicon").parent().removeClass("btn");		 
 		 }
 		 else if (this.queryButton){
 			 $(this.queryButton).unbind( "click" );
@@ -263,7 +272,7 @@ class SimpleSearch{
 	_desbloquear( setFocus ){
 		 this.isDesbloqueado = true;
 		 $(this.query).removeAttr( "readonly");
-			$(this.query).next().children().removeClass("glyphicon-remove").addClass("glyphicon-search");
+		 $(this.query).parent().find(".glyphicon").removeClass("glyphicon-remove").addClass("glyphicon-search");
 			
 			if (setFocus == true){
 //				$(this.query).focus();
@@ -282,6 +291,9 @@ class SimpleSearch{
 		else {
 			this._desbloquear( true );
 			this._setComplemento( "" );
+			
+			$(this.query).show();
+			$(this.containerAutoComplete + " ." + this.classComplemento ).hide();
 		}		 
 	}
 	
@@ -418,8 +430,10 @@ class SimpleSearch{
 				
 				if (this.tableKeepOpen == true){
 					htmlSaida += "<div> ";
-					htmlSaida += "  <div class='glyphicon glyphicon-remove text-danger pull-right acao-fechar' aria-hidden='true' title='Fechar tabela' style='cursor: pointer;'> </div> ";
-//					htmlSaida += "  <button class='btn btn-default btn-xs pull-right' type='button'> <span class='glyphicon glyphicon-remove text-danger' aria-hidden='true'></span>  </button> ";
+					
+					if (this.tableShowClose){
+						htmlSaida += "  <div class='text-danger pull-right acao-fechar' aria-hidden='true' title='Fechar tabela' style='cursor: pointer;'> <h6> <span class='glyphicon glyphicon-remove text-danger'></span> Fechar </h6> </div> ";
+					}
 				}
 				
 				if (!this.tableFields){
@@ -470,7 +484,7 @@ class SimpleSearch{
 						htmlSaida += "<tr class='linhaSs' style='cursor:pointer'>";
 						
 						if (this.tableShowSelect){
-							htmlSaida += "<td class='text-center'> <button type='button' class='btn btn-default btn-xs'> <span class='glyphicon glyphicon-ok'></span> </button> </td>";
+							htmlSaida += "<td class='text-center'> <span class='glyphicon glyphicon-ok'></span>  </td>";
 						}
 						
 						this.tableFields.forEach(function(col, index){
@@ -519,7 +533,7 @@ class SimpleSearch{
     					
     					if (dadosPaginacao){
     						dadosPaginacao.forEach(function(item, index){
-    							var linhaTemplate = "  <li class='#active#' data-pagina='#pagina#' ><a href='javascript:void(0)'>#legenda#</a></li> ";
+    							var linhaTemplate = "  <li class='#active#' data-pagina='#pagina#' ><a href='javascript:void(0)' data-pagina='#pagina#'>#legenda#</a></li> ";
     							htmlSaida += this._atualizaValoresTemplate(item, linhaTemplate);
     						}, this);
     					}
@@ -571,12 +585,15 @@ class SimpleSearch{
 				
 			}
 			else {
-				var msg = "<small><p> <span class='glyphicon glyphicon-info-sign text-primary'></span> ";
+				var msg = "<small><p style='margin-top: 2px;'> <span class='glyphicon glyphicon-info-sign text-primary'></span> ";
 				msg += "<strong>Nenhum resultado encontrado para o termo informado. </strong></p></small>";
 				$(this.queryContent).html( msg );
 				this.paginaAtual = ( this.paginaAtual - 1);
 			}
 			$(this.query).focus();
+		}
+		else {
+			if (this.debug) console.log("continuarExecutando = false");
 		}
 		
 	}
@@ -595,7 +612,9 @@ class SimpleSearch{
 			return;
 		}
 		
-		this._limparConteudo();		
+		if (!this.whenSelectKeepOpen){
+			this._limparConteudo();
+		}
 		
 		var complemento = (this.templateComplement) ? this._atualizaValoresTemplate(row, this.templateComplement) : "";
 		this.select( row[this.fieldId], row[this.field], complemento, true );		
@@ -605,8 +624,10 @@ class SimpleSearch{
 	
 	_setComplemento( complemento ){
 		if (this.templateComplement){
-			var linhaAtualizada = (complemento) ? "<div class='form-control' readonly style='height: auto; font-size: 0.85em;'> " + complemento + " </div>" : "";			
-			$(this.containerAutoComplete + " ." + this.classComplemento ).html(linhaAtualizada);
+			$(this.containerAutoComplete + " ." + this.classComplemento ).html( complemento );
+			
+			$(this.query).hide();
+			$(this.containerAutoComplete + " ." + this.classComplemento ).show();
 		}
 	}
 	
@@ -616,7 +637,14 @@ class SimpleSearch{
 	
 	_acaoClickMouse(event){
 		this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(event.currentTarget) );
-		this._selecionaLinha( this.arrayRegistros[this.indexAtual] );
+		
+		if (!$(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).hasClass("disabled")){
+			$(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).addClass("disabled");
+			this._selecionaLinha( this.arrayRegistros[this.indexAtual] );			
+		}
+		else {
+			this.focus();			
+		}		
 	};
 
 	_acaoClickMouseRemoverItem(event){
@@ -787,7 +815,10 @@ class SimpleSearch{
 			$(this.destinoItensSelecionados).html("");
 			this._setComplemento( "" );
 			this._limparConteudo();
-			this._desbloquear( false );			
+			this._desbloquear( false );
+			
+			$(this.query).show();
+			$(this.containerAutoComplete + " ." + this.classComplemento ).hide();
 		}
 		
 		this._adicionaValorPadrao();
@@ -799,7 +830,7 @@ class SimpleSearch{
 		if (!this.inputNames){
 			$(this.query).val( descricao );    		
 			$(this.query).attr( "readonly", "readonly" );
-			$(this.query).next().children().removeClass("glyphicon-search").addClass("glyphicon-remove");
+			$(this.query).parent().find(".glyphicon").removeClass("glyphicon-search").addClass("glyphicon-remove");
 			
 			if (this.queryId){
 				$(this.queryId).val( (id) ? id : "" );    			
@@ -810,22 +841,31 @@ class SimpleSearch{
 			}
 			
 			if (complemento){
-				this._setComplemento( complemento );
+				this._setComplemento( "<strong>" + descricao + "</strong><br>" + complemento );
 			}
 		}
 		
 		//Adiciona na lista de itens selecionados
 		else if (this.inputNames && ($(this.destinoItensSelecionados + " input[value='" + id + "']").length == 0)){
-			var comComplemento = this._geraComplementoElemento(complemento);
 			var linha = "<div> <div class='input-group input-group-sm'> ";
-			linha += "<span class='input-group-btn itemSs'> <button class='btn btn-danger' type='button'>X</button> </span> ";
-			linha += "<input class='form-control' name='_" + this.inputNames + "' value='" + descricao + "' readonly /> <input type='hidden' name='" + this.inputNames + "' value='" + id + "'>";
-			linha += " </div> " + comComplemento + "  </div>";
+			
+			if (!this.templateComplement){
+				linha += "<input type='hidden' name='" + this.inputNames + "' value='" + id + "' />";				
+				linha += "<input class='form-control' name='_" + this.inputNames + "' value='" + descricao + "' readonly />";				
+			}
+			else {
+				linha += "<input type='hidden' name='" + this.inputNames + "' value='" + id + "' />";
+				linha += "<input type='hidden' name='_" + this.inputNames + "' value='" + descricao + "' />";
+				linha += "<div class='form-control' style='height: auto; resize: none;' readonly > <strong>" + descricao + "</strong><br>" + complemento + "</div>";
+			}
+			
+			linha += "<span class='input-group-addon btn itemSs'>  <span class='glyphicon glyphicon-remove text-primary'></span> </span> ";
+			linha += " </div> </div>";
 			$(this.destinoItensSelecionados).append(linha);
 			
 			
 			if (setFocus == true){
-				$(this.query).focus();			
+				$(this.query).focus();
 			}
 			
 			$(this.destinoItensSelecionados).undelegate(".itemSs", "click");				
@@ -839,7 +879,7 @@ class SimpleSearch{
 		
 		if (this.query){
 			$(this.query).attr( "readonly", "readonly" );
-			$(this.query).next().children().removeClass("glyphicon-search").removeClass("glyphicon-remove").addClass("glyphicon-lock");			
+			$(this.query).parent().find(".glyphicon").removeClass("glyphicon-search").removeClass("glyphicon-remove").addClass("glyphicon-lock");			
 		}
 		else if (this.queryButton){
 			$(this.queryButton).attr( "disabled", "disabled" );
@@ -855,10 +895,10 @@ class SimpleSearch{
 		if (this.query){
 			if (this.isDesbloqueado){
 				$(this.query).removeAttr( "readonly");
-				$(this.query).next().children().removeClass("glyphicon-lock").addClass("glyphicon-search").removeClass("glyphicon-remove");
+				$(this.query).parent().find(".glyphicon").removeClass("glyphicon-lock").addClass("glyphicon-search").removeClass("glyphicon-remove");
 			}
 			else {
-				$(this.query).next().children().removeClass("glyphicon-lock").removeClass("glyphicon-search").addClass("glyphicon-remove");
+				$(this.query).parent().find(".glyphicon").removeClass("glyphicon-lock").removeClass("glyphicon-search").addClass("glyphicon-remove");
 			}			
 		}
 		else if (this.queryButton){
