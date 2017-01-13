@@ -163,6 +163,20 @@ $(document).ready(function() {
 		inputNames: "estadosSelecionados[]",
 	});
 
+	//Com container de itens mantendo aberto
+	var ssBuscaComItensIniciado =  new SimpleSearch({
+//		url: urlControlador, // "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
+		response: function( pagina, termo ){
+			return  pesquisaOffline( pagina, termo );
+		},
+		query: "#busca072",
+		field: "ds_nome",
+// 		fieldId: "id",
+// 		fieldRecords: "obj.registros",
+		inputNames: "estadosSelecionados[]",
+		whenSelectKeepOpen: true,
+	});
+	
 	//Com container de itens iniciado
 	var ssBuscaComItensIniciado =  new SimpleSearch({
 		url: urlControlador,
