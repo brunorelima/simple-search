@@ -458,6 +458,7 @@ var SimpleSearch =
     				
 				}
 				else {
+					htmlSaida += "<div class='table-responsive'>";
 					htmlSaida += "<table class='table table-bordered table-striped table-hover " + this.classResultadoPesquisa + "' style='margin-bottom: 0;'>";
 					
 					//Percorrendo header
@@ -505,6 +506,7 @@ var SimpleSearch =
 					}, this);
 						
 					htmlSaida += "</table>";
+					htmlSaida += "</div>";
 					
 				}
 				
