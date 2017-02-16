@@ -1,6 +1,6 @@
 /*!
  * Versão 1.0a
- * Última alteração: 13/01/2017 
+ * Última alteração: 16/02/2017 
  * https://brunorelima.github.io/simple-search/
  */
 
@@ -29,7 +29,7 @@ var SimpleSearch =
 //		  		fieldPages: "obj.navegacao.paginas",
 		  		delaySearch: 200,
 		    	onsuccess: function(response){
-					if (response.status == 'erro'){
+					if (response && response.status && response.status == 'erro'){
 						if (this.debug) console.error("Deu erro na resposta do servidor.");
 						if (this.debug) console.log(response);
 						alert(response.msg);
@@ -133,7 +133,7 @@ var SimpleSearch =
 			$(this.query).width("");	
 			
 			// Adiciona elementos adicionais		
-			$(this.query).wrap( "<div id='" + this.containerAutoComplete.substring(1) + "'></div>" )
+			$(this.query).wrap( "<div id='" + this.containerAutoComplete.substring(1) + "' class='simple-search'></div>" )
 			$(this.query).wrap( "<div class='input-group'></div>" )
 			$(this.query).after("<span class='input-group-addon btn '>  <span class='glyphicon glyphicon-search text-primary'></span> </span> ");
 			
@@ -250,8 +250,10 @@ var SimpleSearch =
 		 }
 		 
 		 if (this.queryForm){
-			 $(this.queryForm + " .search-on-enter").attr("autocomplete", "off");
-			 $(this.queryForm + " .search-on-enter").keydown( this._acaoPressKey.bind(this) );
+			 if ($(this.queryForm).find(".search-on-enter") != null){
+				 $(this.queryForm).find(".search-on-enter").attr("autocomplete", "off");				 
+				 $(this.queryForm).find(".search-on-enter").keydown( this._acaoPressKey.bind(this) );
+			 }
 		 }
 		 
 	 }
@@ -402,8 +404,8 @@ var SimpleSearch =
 		var continuarExecutando = this.onsuccess( response );
 		if ( continuarExecutando ){
 		
-			try{
-				var obj = eval("response." + this.fieldRecords);
+			try{			
+				var obj = (this.fieldRecords != "") ? eval("response." + this.fieldRecords) : response;
 			}catch(err){
 				if (this.debug) console.log(err);
 				if (this.debug) console.log(response);
@@ -417,7 +419,7 @@ var SimpleSearch =
 			
 			this.arrayRegistros = (this.fieldRecords && obj) ? obj : response.obj;
 			
-			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.field] == undefined){
+			if ((!this.field && !this.tableFields) || (!this.tableFields && this.arrayRegistros[0] && this.arrayRegistros[0][this.field] == undefined)){
 				console.error("Valor da 'field' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
 			}
 			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.fieldId] == undefined){
@@ -458,7 +460,7 @@ var SimpleSearch =
     				
 				}
 				else {
-					htmlSaida += "<div class='table-responsive'>";
+					htmlSaida += "<div class='table-responsive simple-search'>"; 
 					htmlSaida += "<table class='table table-bordered table-striped table-hover " + this.classResultadoPesquisa + "' style='margin-bottom: 0;'>";
 					
 					//Percorrendo header
@@ -482,7 +484,7 @@ var SimpleSearch =
 						
 					//Percorrendo registros    						
 					this.arrayRegistros.forEach(function(registro, index){
-						htmlSaida += "<tr class='linhaSs' style='cursor:pointer'>";
+					htmlSaida += "<tr class='linhaSs' style='cursor:pointer'>"; //tabindex='0'
 						
 						if (this.tableShowSelect){
 							htmlSaida += "<td class='text-center'> <span class='glyphicon glyphicon-ok'></span>  </td>";
@@ -512,7 +514,20 @@ var SimpleSearch =
 				
 				
 				// Controle das paginas
-				var qtdPaginasTotal = eval("response." + this.fieldSizePages) || -1;
+//				var qtdPaginasTotal = (isNaN(this.fieldSizePages)) ? eval("response." + this.fieldSizePages) || -1 : this.fieldSizePages;
+				var qtdPaginasTotal = -1;
+				if (!isNaN(this.fieldSizePages)){
+					qtdPaginasTotal = this.fieldSizePages;
+				}
+				else {
+					try{
+						var aux = eval("response." + this.fieldSizePages) || -1;
+						qtdPaginasTotal = aux;
+					}catch(error){
+						console.warn("Erro ao tentar pegar o valor de fieldSizePages. ", error);
+					}
+				}
+				
 				var complementoBotaoAnterior = (this.paginaAtual == 1) ? "disabled" : "";
 				var complementoBotaoProximo = (this.paginaAtual == qtdPaginasTotal) ? "disabled" : "";
 				
