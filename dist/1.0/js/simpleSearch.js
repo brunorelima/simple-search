@@ -1,6 +1,6 @@
 /*!
  * Versão 1.0a
- * Última alteração: 16/02/2017 
+ * Última alteração: 22/02/2017 
  * https://brunorelima.github.io/simple-search/
  */
 
@@ -44,8 +44,7 @@ var SimpleSearch =
 	  	
 		this.paginaAtual = 0;
 		this.indexAtual = -1;
-		this.arrayRegistros = [];
-		this.classeLinhaSelecionada = (propriedades.tableFields) ? "info" : "active";
+		this.arrayRegistros = [];		
 		this.logNomeClasse = "[SimpleSearch]";
 		
 		this.ultimoParametroPesquisado = "";
@@ -112,6 +111,7 @@ var SimpleSearch =
 		this.tableLastColumn = propriedades.tableLastColumn;
 		this.tableShowClose = propriedades.tableShowClose;
 		this.whenSelectKeepOpen = propriedades.whenSelectKeepOpen;
+		this.disableSelectRow = propriedades.disableSelectRow || false;
 		
 		this.data = propriedades.data || function(){ return ""; };
 		this.onselect = propriedades.onselect || function(){};
@@ -119,11 +119,16 @@ var SimpleSearch =
 		this.onsuccess = propriedades.onsuccess || function( response ){ return true; };
 		
 		
+		this.containerAutoComplete = "#containerPesquisa" + SimpleSearch.getIdentificador();
 		this.classResultadoPesquisa = "simpleSearchResult";
 		this.classDestinoConteudo = "containerResult";
 		this.classItensSelecionados = "containerItensSelecionados";
 		this.classComplemento = "complemento";
-		this.containerAutoComplete = "#containerPesquisa" + SimpleSearch.getIdentificador();
+		this.classLinhaSelecionada = "simpleSearchLinhaSelecionada";
+		
+		if (this.disableSelectRow != true){
+			this.classLinhaSelecionada = (propriedades.tableFields) ? "info" : "active";			
+		}
 
 		if (this.query){
 			
@@ -153,7 +158,7 @@ var SimpleSearch =
 	
 	    	// Retira item selecionado ao clicar na caixa de seleção
 	    	$(this.query).click($.proxy(function () {
-	    		$(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada).removeClass(this.classeLinhaSelecionada);
+	    		$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
 	    	},this));
 	    	
 		}
@@ -343,12 +348,14 @@ var SimpleSearch =
 		var paramData = (this.data && typeof this.data === "function") ? this.data() : this.data;
 		params += ((paramData && paramData != "") ? "&" + jQuery.param(paramData) : "");
 		
+		/*
 		//Verifica se esta repetindo a busca
 		if (this.ultimoParametroPesquisado == params && $(this.queryContent).html() != ""){
 			if (this.debug) console.log("Repetiu a busca: " + params);
 			this.autoIniciarStarted = false;
 			return;
 		}
+		*/
 		
 		this.ultimaPalavraPesquisada = $(this.query).val();
 		
@@ -419,7 +426,7 @@ var SimpleSearch =
 			
 			this.arrayRegistros = (this.fieldRecords && obj) ? obj : response.obj;
 			
-			if ((!this.field && !this.tableFields) || (!this.tableFields && this.arrayRegistros[0] && this.arrayRegistros[0][this.field] == undefined)){
+			if ((!this.field && !this.tableFields && !this.templateField) || (!this.templateField && !this.tableFields && this.arrayRegistros[0] && this.arrayRegistros[0][this.field] == undefined)){
 				console.error("Valor da 'field' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
 			}
 			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.fieldId] == undefined){
@@ -446,14 +453,7 @@ var SimpleSearch =
     					//Complemento pra verificar se tem que desativar a linha ou não
     					var complementoLinha = (this.inputNames && ($(this.destinoItensSelecionados + " input[value='" + item[this.fieldId] + "']").length != 0)) ? "disabled" : "";    					
     					htmlSaida += "<li class='list-group-item linhaSs " + complementoLinha + "' style='cursor: pointer;'>";
-    					
-    					if (this.templateField){
-    						htmlSaida += this._atualizaValoresTemplate(item, this.templateField);
-    					}
-    					else {	    						
-    						htmlSaida += item[this.field];
-    					}
-    					
+    					htmlSaida += (this.templateField) ? this._atualizaValoresTemplate(item, this.templateField) : item[this.field];
     					htmlSaida += " </li>";
     				}, this);
     				htmlSaida += "</ul>";	    				
@@ -481,17 +481,21 @@ var SimpleSearch =
 						
 						htmlSaida += "</tr>";    						
 					}
-						
+					
+					var complementoCss = (this.disableSelectRow != true) ? "style='cursor:pointer'" : "";
+					
 					//Percorrendo registros    						
 					this.arrayRegistros.forEach(function(registro, index){
-					htmlSaida += "<tr class='linhaSs' style='cursor:pointer'>"; //tabindex='0'
+					htmlSaida += "<tr class='linhaSs' " + complementoCss + ">"; //tabindex='0'
 						
 						if (this.tableShowSelect){
 							htmlSaida += "<td class='text-center'> <span class='glyphicon glyphicon-ok'></span>  </td>";
 						}
 						
 						this.tableFields.forEach(function(col, index){
-							htmlSaida += "<td> " + registro[col] + " </td>";    								
+							htmlSaida += "<td>";
+							htmlSaida += (col.indexOf(" ") >= 0 ) ? this._atualizaValoresTemplate(registro, col) : registro[col]; //Adicionando suporte a template
+							htmlSaida += "</td>";
 						}, this);
 						
 						if (this.tableLastColumn){
@@ -578,8 +582,10 @@ var SimpleSearch =
     				$(this.queryContent).delegate(".acao-fechar", "click", this._limparConteudo.bind(this));	    					
 				}
 				
-				$(this.queryContent).undelegate(".linhaSs", "click");				
-				$(this.queryContent).delegate(".linhaSs", "click", this._acaoClickMouse.bind(this));
+				if (this.disableSelectRow != true){
+					$(this.queryContent).undelegate(".linhaSs", "click");				
+					$(this.queryContent).delegate(".linhaSs", "click", this._acaoClickMouse.bind(this));
+				}
 				
 				$(this.resultadoPesquisa).undelegate(".linhaSs", "mouseover");
 				$(this.resultadoPesquisa).delegate(".linhaSs", "mouseover", this._acaoMouseOver.bind(this));
@@ -621,6 +627,20 @@ var SimpleSearch =
             var __er = new RegExp(__token, "ig");
             templateField = templateField.replace(__er, valor == null ? '' : valor);
 		});
+		
+		//Limpando os templates não encontrados
+		var fimCorte = "";
+		var inicioCorte = templateField.indexOf("#");
+		while(inicioCorte >= 0){			
+			fimCorte = templateField.indexOf("#", inicioCorte+1);
+			if (fimCorte > 0) {
+				templateField = templateField.substring(0, inicioCorte) +  templateField.substring(fimCorte+1);				
+			}
+			else {
+				return templateField;
+			}
+		}
+		
 		return templateField;
 	}
 	
@@ -634,7 +654,7 @@ var SimpleSearch =
 		}
 		
 		var complemento = (this.templateComplement) ? this._atualizaValoresTemplate(row, this.templateComplement) : "";
-		this.select( row[this.fieldId], row[this.field], complemento, true );		
+		this.select( row[this.fieldId], row[this.field], complemento, true, row );		
 		this.onselect( row );
 		
 	};
@@ -669,8 +689,8 @@ var SimpleSearch =
 	};	
 
 	_acaoMouseOver(event){
-		$(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada).removeClass(this.classeLinhaSelecionada);
-    	$(event.currentTarget).addClass(this.classeLinhaSelecionada);
+		$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
+    	$(event.currentTarget).addClass(this.classLinhaSelecionada);
 	};
 	
 	_acaoPressKey(event){
@@ -681,7 +701,7 @@ var SimpleSearch =
 		
 		switch (event.keyCode) {
 			case 13: // Tecla ENTER
-				this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada) );
+				this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );
 				if (this.indexAtual >= 0){
 					this._selecionaLinha( this.arrayRegistros[this.indexAtual] );
 					event.preventDefault();
@@ -711,20 +731,20 @@ var SimpleSearch =
 				break;
 				
 			case 40: // Tecla para baixo				
-				this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada) );
+				this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );
 				this.indexAtual++; 
             	
-            	$(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada).removeClass(this.classeLinhaSelecionada);
-            	$(this.resultadoPesquisa + " .linhaSs:eq(" + this.indexAtual + ")").addClass(this.classeLinhaSelecionada);
+            	$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
+            	$(this.resultadoPesquisa + " .linhaSs:eq(" + this.indexAtual + ")").addClass(this.classLinhaSelecionada);
             	event.preventDefault();
 				break;
 				
 			case 38: // Tecla para cima
-            	this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada) );            	
+            	this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );            	
             	this.indexAtual--; 
             	
-            	$(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada).removeClass(this.classeLinhaSelecionada);
-            	$(this.resultadoPesquisa + " .linhaSs:eq(" + this.indexAtual + ")").addClass(this.classeLinhaSelecionada);
+            	$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
+            	$(this.resultadoPesquisa + " .linhaSs:eq(" + this.indexAtual + ")").addClass(this.classLinhaSelecionada);
             	event.preventDefault();
 				break;
 				
@@ -748,7 +768,7 @@ var SimpleSearch =
 			case 144: break; // Tecla NUM LOCK
 				
 			default:
-				$(this.resultadoPesquisa + " ." + this.classeLinhaSelecionada).removeClass(this.classeLinhaSelecionada);
+				$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
 				
 				if (this.delayAutoSearch != -1){
 					
@@ -842,10 +862,11 @@ var SimpleSearch =
 		this.onreset();		
 	};
 	
-	select( id, descricao, complemento, setFocus ){
+	select( id, descricao, complemento, setFocus, row ){
+		var descricao = (this.templateField && row) ? this._atualizaValoresTemplate(row, this.templateField) : descricao;
 		//Verifica se vai usar o modo que adiciona vários itens num container, ou se pode selecionar apenas um item no próprio seletor
 		if (!this.inputNames){
-			$(this.query).val( descricao );    		
+			$(this.query).val( descricao );
 			$(this.query).attr( "readonly", "readonly" );
 			$(this.query).parent().find(".glyphicon").removeClass("glyphicon-search").addClass("glyphicon-remove");
 			
