@@ -1,6 +1,6 @@
 /*!
  * Versão 1.0a
- * Última alteração: 22/02/2017 
+ * Última alteração: 28/06/2017 
  * https://brunorelima.github.io/simple-search/
  */
 
@@ -20,6 +20,19 @@ var SimpleSearch =
 	}
 	
 	 constructor(options){
+		
+		//Valida se o componente já foi iniciado antes
+		if (options.query && $(options.query).parent().parent().hasClass("simple-search")){
+			var msgErro = "Erro: Já foi iniciado um componente para a query '" + options.query + "'";
+			console.error( msgErro );
+			$(options.query).val( msgErro );
+			$(options.query).attr( "title", msgErro );
+			$(options.query).attr("disabled", "disabled");
+			$(options.query).css("background", "#f9d8d8");
+			$(options.query).next().attr("disabled", "disabled");
+			$(options.query).next().unbind("click");
+			return;
+		}
 		 
 	  	var defaults = {
 		  		method: "GET",
@@ -111,8 +124,9 @@ var SimpleSearch =
 		this.tableLastColumn = propriedades.tableLastColumn;
 		this.tableShowClose = propriedades.tableShowClose;
 		this.whenSelectKeepOpen = propriedades.whenSelectKeepOpen;
+		this.whenEnableReset = propriedades.whenEnableReset || true;
+		this.whenNullSetEmpty = propriedades.whenNullSetEmpty || false;
 		this.disableSelectRow = propriedades.disableSelectRow || false;
-		
 		this.data = propriedades.data || function(){ return ""; };
 		this.onselect = propriedades.onselect || function(){};
 		this.onreset = propriedades.onreset || function(){};
@@ -221,7 +235,9 @@ var SimpleSearch =
 			        		this._limparConteudo();
 			        	}			        	
 			        }
-			    }
+			    } else if (!$(this.queryId).val()) {
+                                this._limparConteudo();
+                            }
 			},this));
 			
 			// Se clicar no botão de pesquisa executa ação
@@ -301,6 +317,10 @@ var SimpleSearch =
 			
 			$(this.query).show();
 			$(this.containerAutoComplete + " ." + this.classComplemento ).hide();
+			
+			if (this.whenEnableReset == true){
+				this.reset();
+			}
 		}		 
 	}
 	
@@ -398,7 +418,7 @@ var SimpleSearch =
 					 this.autoIniciarStarted = false;
 					 
 					 var conteudo = $(this.queryContent).html();
-					 if (conteudo.indexOf("progressbar") > 0){
+					 if (conteudo && conteudo.indexOf("progressbar") > 0){
 						 $(this.queryContent).html("");
 					 }
 				  }
@@ -429,7 +449,7 @@ var SimpleSearch =
 			if ((!this.field && !this.tableFields && !this.templateField) || (!this.templateField && !this.tableFields && this.arrayRegistros[0] && this.arrayRegistros[0][this.field] == undefined)){
 				console.error("Valor da 'field' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
 			}
-			if (this.arrayRegistros[0] && this.arrayRegistros[0][this.fieldId] == undefined){
+			if (this.fieldId && this.arrayRegistros[0] && this.arrayRegistros[0][this.fieldId] == undefined){
 				console.error("Valor da 'fieldId' do item está indefinido, confira se o parametro passado está correto. " + this.logNomeClasse);
 			}
 			
@@ -448,13 +468,16 @@ var SimpleSearch =
 				if (!this.tableFields){
 				
     				htmlSaida += "<ul class='list-group " + this.classResultadoPesquisa + "' style='margin-bottom: 0;'>";
+    				
+    				var valor = "";
     				this.arrayRegistros.forEach(function(item, index){
 
     					//Complemento pra verificar se tem que desativar a linha ou não
-    					var complementoLinha = (this.inputNames && ($(this.destinoItensSelecionados + " input[value='" + item[this.fieldId] + "']").length != 0)) ? "disabled" : "";    					
-    					htmlSaida += "<li class='list-group-item linhaSs " + complementoLinha + "' style='cursor: pointer;'>";
-    					htmlSaida += (this.templateField) ? this._atualizaValoresTemplate(item, this.templateField) : item[this.field];
-    					htmlSaida += " </li>";
+    					var complementoLinha = (this.inputNames && ($(this.destinoItensSelecionados + " input[value='" + item[this.fieldId] + "']").length != 0)) ? "disabled" : "";
+						valor = (this.templateField) ? this._atualizaValoresTemplate(item, this.templateField) : item[this.field];
+						valor = (!valor && this.whenNullSetEmpty) ? "" : valor;
+						
+    					htmlSaida += "<li class='list-group-item linhaSs " + complementoLinha + "' style='cursor: pointer;'>" + valor + " </li>"; 
     				}, this);
     				htmlSaida += "</ul>";	    				
     				
@@ -492,10 +515,11 @@ var SimpleSearch =
 							htmlSaida += "<td class='text-center'> <span class='glyphicon glyphicon-ok'></span>  </td>";
 						}
 						
+						var valor = "";
 						this.tableFields.forEach(function(col, index){
-							htmlSaida += "<td>";
-							htmlSaida += (col.indexOf(" ") >= 0 ) ? this._atualizaValoresTemplate(registro, col) : registro[col]; //Adicionando suporte a template
-							htmlSaida += "</td>";
+							valor = (col.indexOf(" ") >= 0 ) ? this._atualizaValoresTemplate(registro, col) : registro[col]; //Adicionando suporte a template
+							valor = (!valor && this.whenNullSetEmpty) ? "" : valor;
+							htmlSaida += "<td>" + valor + "</td>";							
 						}, this);
 						
 						if (this.tableLastColumn){
@@ -631,14 +655,17 @@ var SimpleSearch =
 		//Limpando os templates não encontrados
 		var fimCorte = "";
 		var inicioCorte = templateField.indexOf("#");
-		while(inicioCorte >= 0){			
+		var count = (templateField.match(/#/g) || []).length;
+		
+		while(inicioCorte >= 0 && count >= 2){
 			fimCorte = templateField.indexOf("#", inicioCorte+1);
 			if (fimCorte > 0) {
 				templateField = templateField.substring(0, inicioCorte) +  templateField.substring(fimCorte+1);				
 			}
-			else {
-				return templateField;
-			}
+			
+			//Preparando para continuação do laço
+			inicioCorte = templateField.indexOf("#");
+			count = (templateField.match(/#/g) || []).length;
 		}
 		
 		return templateField;
@@ -836,13 +863,16 @@ var SimpleSearch =
 	};
 	
 	_limparConteudo(){
-		$(this.queryContent).html("");
+		var queryContent = document.querySelector( this.queryContent );
+		if (queryContent) queryContent.innerHTML = "";
+		
 		this.ultimoParametroPesquisado = "";
 		this.ultimaPalavraPesquisada = "-1";
 		this.paginaAtual = 0;
 		
-		if (this.whenBlurClear){
-			$(this.query).val("");
+		if (this.whenBlurClear && !$(this.queryId).val()){
+			document.querySelector( this.query ).value = "";
+			document.querySelector( this.queryId ).value = "";
 		}		
 	};
 	
