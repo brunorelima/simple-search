@@ -1,6 +1,6 @@
 /*!
  * Versão 1.0a
- * Última alteração: 28/06/2017 
+ * Última alteração: 05/07/2017 
  * https://brunorelima.github.io/simple-search/
  */
 
@@ -871,8 +871,8 @@ var SimpleSearch =
 		this.paginaAtual = 0;
 		
 		if (this.whenBlurClear && !$(this.queryId).val()){
-			document.querySelector( this.query ).value = "";
-			document.querySelector( this.queryId ).value = "";
+			if (document.querySelector( this.query ) ) document.querySelector( this.query ).value = "";
+			if (document.querySelector( this.queryId ) ) document.querySelector( this.queryId ).value = "";
 		}		
 	};
 	
