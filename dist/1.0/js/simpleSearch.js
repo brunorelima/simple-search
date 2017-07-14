@@ -1,6 +1,6 @@
 /*!
  * Versão 1.0a
- * Última alteração: 05/07/2017 
+ * Última alteração: 14/07/2017 
  * https://brunorelima.github.io/simple-search/
  */
 
@@ -9,7 +9,7 @@
 var SimpleSearch =
  class SimpleSearch{
 	
-	static getIdentificador(){
+	static _getIdentificador(){
 		if (this.identificador == null){
 			this.identificador = 1;			
 		}
@@ -20,18 +20,14 @@ var SimpleSearch =
 	}
 	
 	 constructor(options){
+		 if (options.debug) console.log( "SimpleSearch START ", options );
 		
 		//Valida se o componente já foi iniciado antes
 		if (options.query && $(options.query).parent().parent().hasClass("simple-search")){
-			var msgErro = "Erro: Já foi iniciado um componente para a query '" + options.query + "'";
-			console.error( msgErro );
-			$(options.query).val( msgErro );
-			$(options.query).attr( "title", msgErro );
-			$(options.query).attr("disabled", "disabled");
-			$(options.query).css("background", "#f9d8d8");
-			$(options.query).next().attr("disabled", "disabled");
-			$(options.query).next().unbind("click");
-			return;
+			console.warn( "Atenção: Foi recriado um componente SimpleSearch utilizando a mesma query '" + options.query + "' que foi utilizada anteriormente. " );
+			
+			this.query = options.query;			
+			this.destroy();
 		}
 		 
 	  	var defaults = {
@@ -41,6 +37,7 @@ var SimpleSearch =
 		  		fieldSizePages: "obj.propriedades.qtdPaginasTotal",
 //		  		fieldPages: "obj.navegacao.paginas",
 		  		delaySearch: 200,
+		  		whenBlurClear: true,
 		    	onsuccess: function(response){
 					if (response && response.status && response.status == 'erro'){
 						if (this.debug) console.error("Deu erro na resposta do servidor.");
@@ -132,13 +129,14 @@ var SimpleSearch =
 		this.onreset = propriedades.onreset || function(){};
 		this.onsuccess = propriedades.onsuccess || function( response ){ return true; };
 		
-		
-		this.containerAutoComplete = "#containerPesquisa" + SimpleSearch.getIdentificador();
+		this.containerAutoComplete = "#containerPesquisa" + SimpleSearch._getIdentificador();
 		this.classResultadoPesquisa = "simpleSearchResult";
 		this.classDestinoConteudo = "containerResult";
 		this.classItensSelecionados = "containerItensSelecionados";
 		this.classComplemento = "complemento";
 		this.classLinhaSelecionada = "simpleSearchLinhaSelecionada";
+		
+		this._logDebug( "container " + this.containerAutoComplete );
 		
 		if (this.disableSelectRow != true){
 			this.classLinhaSelecionada = (propriedades.tableFields) ? "info" : "active";			
@@ -199,6 +197,17 @@ var SimpleSearch =
 		this._adicionaEventos();	
 		this._adicionaValorPadrao();
 		
+		this._logDebug( "function constructor() - END" );
+	 }
+	 
+	 _logDebug( msg ){
+		 if (this.debug) {
+			 if (!this._prefixoDebug){
+				 this._prefixoDebug = "SimpleSearch:" + (this.query || this.queryButton || "???") + " | ";
+			 }
+			 
+			 console.log( this._prefixoDebug + msg );
+		 }
 	 }
 	 
 	 _adicionaValorPadrao(){
@@ -220,6 +229,8 @@ var SimpleSearch =
 	 }
 	 
 	 _adicionaEventos(){
+		 this._logDebug( "function _adicionaEventos()" );
+		 
 		 if (this.query){
 		 
 			// Limpa caixa ao perder foco
@@ -235,9 +246,11 @@ var SimpleSearch =
 			        		this._limparConteudo();
 			        	}			        	
 			        }
-			    } else if (!$(this.queryId).val()) {
-                                this._limparConteudo();
-                            }
+			    }
+				//Limpando o valor caso digitar algo e perder o foco sem nem pesquisar
+				else if ( this.isDesbloqueado && this.whenBlurClear && $(this.query).val() && !$(this.resultadoPesquisa).html()) {
+                    this._limparConteudo();
+                }
 			},this));
 			
 			// Se clicar no botão de pesquisa executa ação
@@ -280,6 +293,8 @@ var SimpleSearch =
 	 }
 	 
 	 _removeEventos(){
+		 this._logDebug( "function _removeEventos()" );
+		 
 		 if (this.query){
 			 $(this.query).unbind( "dblclick" );
 			 $(this.query).parent().find(".input-group-addon").unbind( "click" );
@@ -326,6 +341,8 @@ var SimpleSearch =
 	
 
 	_pesquisar( pagina ){
+		this._logDebug( "function _pesquisar(" + pagina + ") - START" );
+		
 		//Se tiver iniciado um temporizador, cancela ele pra poder iniciar outro
 		if (this.idTimeoutAutoSearch){
 			clearTimeout(this.idTimeoutAutoSearch);
@@ -424,6 +441,8 @@ var SimpleSearch =
 				  }
 			});
 		}
+		
+		this._logDebug( "function _pesquisar(" + pagina + ") - END" );
 	};
 	
 	_trataRepostaServidor( response ){
@@ -744,7 +763,8 @@ var SimpleSearch =
 				break;
 				
 			case 9: // Tecla TAB
-				if (this.tableKeepOpen != true){
+				//Limpando o valor caso digitar algo e perder o foco
+				if (this.tableKeepOpen != true && this.isDesbloqueado && this.whenBlurClear && $(this.query).val() ){
 					this._limparConteudo();
 				}
 				break;
@@ -862,7 +882,9 @@ var SimpleSearch =
 		this._pesquisar( (this.paginaAtual > 1) ? this.paginaAtual-1 : 1 );
 	};
 	
-	_limparConteudo(){
+	_limparConteudo(){		
+		this._logDebug( "function _limparConteudo() - START" );
+		
 		var queryContent = document.querySelector( this.queryContent );
 		if (queryContent) queryContent.innerHTML = "";
 		
@@ -873,10 +895,14 @@ var SimpleSearch =
 		if (this.whenBlurClear && !$(this.queryId).val()){
 			if (document.querySelector( this.query ) ) document.querySelector( this.query ).value = "";
 			if (document.querySelector( this.queryId ) ) document.querySelector( this.queryId ).value = "";
-		}		
+		}
+		
+		this._logDebug( "function _limparConteudo() - END" );
 	};
 	
 	reset(){
+		this._logDebug( "function reset() - START" );
+		
 		if (!this.isBlocked){
 			$(this.query).val( "" );
 			$(this.destinoItensSelecionados).html("");
@@ -889,10 +915,32 @@ var SimpleSearch =
 		}
 		
 		this._adicionaValorPadrao();
+		
+		this._logDebug( "function onreset() - START" );
 		this.onreset();		
+		this._logDebug( "function onreset() - END" );
+		this._logDebug( "function reset() - END" );
 	};
 	
+	/**
+	 * Retira o componente SimpleSearch do elemento
+	 */
+	destroy(){
+		this._logDebug( "function destroy()" );
+		
+		var input = $( this.query );
+		var idSimpleSearch = $( this.query ).parent().parent();
+		
+		$( this.query ).parent().parent().after( input );
+		$( idSimpleSearch ).remove();
+		
+		$( this.query ).removeClass("form-control");
+		$( this.query ).removeAttr("autocomplete");
+	}
+	
 	select( id, descricao, complemento, setFocus, row ){
+		this._logDebug( "function select() - START" );
+		
 		var descricao = (this.templateField && row) ? this._atualizaValoresTemplate(row, this.templateField) : descricao;
 		//Verifica se vai usar o modo que adiciona vários itens num container, ou se pode selecionar apenas um item no próprio seletor
 		if (!this.inputNames){
@@ -940,9 +988,12 @@ var SimpleSearch =
 			$(this.destinoItensSelecionados).delegate(".itemSs", "click", this._acaoClickMouseRemoverItem.bind(this));
 		}
 		
+		this._logDebug( "function select() - END" );
 	};
 	
 	disabled(){
+		this._logDebug( "function disabled()" );
+		
 		this.isBlocked = true;
 		
 		if (this.query){
@@ -957,6 +1008,8 @@ var SimpleSearch =
 	};
 	
 	enabled(){
+		this._logDebug( "function enabled()" );
+		
 		this.isBlocked = false;
 		this._adicionaEventos();
 		
@@ -975,6 +1028,7 @@ var SimpleSearch =
 	};
 	
 	focus(){
+		this._logDebug( "function focus()" );
 		$(this.query).focus();
 	};
   
