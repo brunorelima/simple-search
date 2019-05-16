@@ -1,15 +1,15 @@
 /*!
  * Versão 1.0a
- * Última alteração: 13/08/2018 
+ * Última alteração: 14/03/2017 
  * https://brunorelima.github.io/simple-search/
  */
 
-//"use strict";
-if (SimpleSearch) console.warn("Atenção, o SimpleSearch foi iniciado mais de uma vez e poderá ocorrer bugs.");
+"use strict";
+
 var SimpleSearch =
  class SimpleSearch{
 	
-	static _getIdentificador(){
+	static getIdentificador(){
 		if (this.identificador == null){
 			this.identificador = 1;			
 		}
@@ -20,15 +20,6 @@ var SimpleSearch =
 	}
 	
 	 constructor(options){
-		 if (options.debug) console.log( "SimpleSearch START ", options );
-		
-		//Valida se o componente já foi iniciado antes
-		if (options.query && $(options.query).parent().parent().hasClass("simple-search")){
-			console.warn( "Atenção: Foi recriado um componente SimpleSearch utilizando a mesma query '" + options.query + "' que foi utilizada anteriormente. " );
-			
-			this.query = options.query;			
-			this.destroy();
-		}
 		 
 	  	var defaults = {
 		  		method: "GET",
@@ -37,19 +28,14 @@ var SimpleSearch =
 		  		fieldSizePages: "obj.propriedades.qtdPaginasTotal",
 //		  		fieldPages: "obj.navegacao.paginas",
 		  		delaySearch: 200,
-		  		whenBlurClear: true,
 		    	onsuccess: function(response){
-					if (response && response.status && (response.status == 'erro' || response.status == 'warning')){
-						console.error("O servidor respondeu com status de erro.");
-						if (this.debug) console.log(response);						
-						this.onerror(response);
+					if (response && response.status && response.status == 'erro'){
+						if (this.debug) console.error("Deu erro na resposta do servidor.");
+						if (this.debug) console.log(response);
+						alert(response.msg);
 						return false;
 					}
 					return true;
-				},
-				onerror: function(response){
-					$(this.queryContent).html( "<p class='text-danger'><strong> Erro na resposta do servidor para o simpleSearch [code 10] </strong></p>" );
-//					if (response && response.msg) alert(response.msg);
 				},
 	  	};
 	  	
@@ -105,10 +91,8 @@ var SimpleSearch =
 		this.inputNames = propriedades.inputNames;
 		this.minLength = propriedades.minLength || 0;
 		this.defaultValue = propriedades.defaultValue;
-		this.defaultEmptyMsg = propriedades.defaultEmptyMsg;
 		this.tableTitles = propriedades.tableTitles;
 		this.tableFields = propriedades.tableFields;
-		this.tableFieldsTooltips = propriedades.tableFieldsTooltips;
 		this.queryContent = propriedades.queryContent;
 		this.queryContentExterno = (propriedades.queryContent) ? true : false;
 		this.queryButton = propriedades.queryButton;
@@ -134,19 +118,14 @@ var SimpleSearch =
 		this.onselect = propriedades.onselect || function(){};
 		this.onreset = propriedades.onreset || function(){};
 		this.onsuccess = propriedades.onsuccess || function( response ){ return true; };
-		this.oncomplete = propriedades.oncomplete || function(){ };
-		this.onerror = propriedades.onerror || function( response ){ };
-		this.onremoveselecteditem = propriedades.onremoveselecteditem || function( itemId ){ };
-		this.responseChange = propriedades.responseChange || function( response ){ return response; };
 		
-		this.containerAutoComplete = "#containerSimpleSearch" + SimpleSearch._getIdentificador();
+		
+		this.containerAutoComplete = "#containerPesquisa" + SimpleSearch.getIdentificador();
 		this.classResultadoPesquisa = "simpleSearchResult";
 		this.classDestinoConteudo = "containerResult";
 		this.classItensSelecionados = "containerItensSelecionados";
 		this.classComplemento = "complemento";
 		this.classLinhaSelecionada = "simpleSearchLinhaSelecionada";
-		
-		this._logDebug( "container " + this.containerAutoComplete );
 		
 		if (this.disableSelectRow != true){
 			this.classLinhaSelecionada = (propriedades.tableFields) ? "info" : "active";			
@@ -207,26 +186,6 @@ var SimpleSearch =
 		this._adicionaEventos();	
 		this._adicionaValorPadrao();
 		
-		this._logDebug( "function constructor() - END" );
-	 }
-	 
-	_set(query, value){
-		if ( typeof query === 'string' || query instanceof String ) {
-			query = document.querySelector( query ); 
-		}		
-		if (query) {
-			query.value = value;			
-		}
-	}
-	 
-	 _logDebug( msg ){
-		 if (this.debug) {
-			 if (!this._prefixoDebug){
-				 this._prefixoDebug = "SimpleSearch:" + (this.query || this.queryButton || "???") + " | ";
-			 }
-			 
-			 console.log( this._prefixoDebug + msg );
-		 }
 	 }
 	 
 	 _adicionaValorPadrao(){
@@ -248,8 +207,6 @@ var SimpleSearch =
 	 }
 	 
 	 _adicionaEventos(){
-		 this._logDebug( "function _adicionaEventos()" );
-		 
 		 if (this.query){
 		 
 			// Limpa caixa ao perder foco
@@ -266,10 +223,6 @@ var SimpleSearch =
 			        	}			        	
 			        }
 			    }
-				//Limpando o valor caso digitar algo e perder o foco sem nem pesquisar
-				else if ( this.isDesbloqueado && this.whenBlurClear && $(this.query).val() && !$(this.resultadoPesquisa).html()) {
-                    this._limparConteudo();
-                }
 			},this));
 			
 			// Se clicar no botão de pesquisa executa ação
@@ -312,8 +265,6 @@ var SimpleSearch =
 	 }
 	 
 	 _removeEventos(){
-		 this._logDebug( "function _removeEventos()" );
-		 
 		 if (this.query){
 			 $(this.query).unbind( "dblclick" );
 			 $(this.query).parent().find(".input-group-addon").unbind( "click" );
@@ -360,8 +311,6 @@ var SimpleSearch =
 	
 
 	_pesquisar( pagina ){
-		this._logDebug( "function _pesquisar(" + pagina + ") - START" );
-		
 		//Se tiver iniciado um temporizador, cancela ele pra poder iniciar outro
 		if (this.idTimeoutAutoSearch){
 			clearTimeout(this.idTimeoutAutoSearch);
@@ -387,7 +336,8 @@ var SimpleSearch =
 		
 		if (this.query && $(this.query).val().length < this.minLength){
 			if (this.debug) console.log("Para pesquisar precisa digitar pelo menos " + this.minLength + " caracteres.");			
-			var msg = "<p><strong>Para pesquisar precisa digitar pelo menos " + this.minLength + " caracteres. </strong></p>";
+			var msg = "<p> <small> <span class='glyphicon glyphicon-alert text-warning'></span> ";
+			msg += "<strong> Para pesquisar precisa digitar pelo menos " + this.minLength + " caracteres. </strong> </small> </p>";
 			$(this.queryContent).html(msg);
 			
 			this.autoIniciarStarted = false;
@@ -440,8 +390,9 @@ var SimpleSearch =
 						  console.error(error);					  
 					  }				  
 					  
-					  $(this.queryContent).html( "<p class='text-danger'><strong> Erro na resposta do servidor para o simpleSearch [code 20] </strong></p>" );
-					  this.onerror( error );
+					  var msg = "<p> <small> <span class='glyphicon glyphicon-exclamation-sign text-danger'></span> ";
+					  msg += "<strong>Erro na consulta do simpleSearch </strong> </small> </p>";
+					  $(this.queryContent).html(msg);				  
 				  },
 				  beforeSend: function(){
 					  var msg = " <div class='progress' role='progressbar' style='height: 10px;'> <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%' >";
@@ -452,18 +403,15 @@ var SimpleSearch =
 					 this.autoIniciarStarted = false;
 					 
 					 var conteudo = $(this.queryContent).html();
-					 if (conteudo && conteudo.indexOf("progressbar") > 0){
+					 if (conteudo.indexOf("progressbar") > 0){
 						 $(this.queryContent).html("");
 					 }
 				  }
 			});
 		}
-		
-		this._logDebug( "function _pesquisar(" + pagina + ") - END" );
 	};
 	
 	_trataRepostaServidor( response ){
-		response = this.responseChange(response);
 		
 		var continuarExecutando = this.onsuccess( response );
 		if ( continuarExecutando ){
@@ -473,15 +421,11 @@ var SimpleSearch =
 			}catch(err){
 				if (this.debug) console.log(err);
 				if (this.debug) console.log(response);
-
-				$(this.queryContent).html( "<p class='text-danger'><strong> Erro na resposta do servidor para o simpleSearch [code 30] </strong></p>" );
-				this.onerror( response );
-				throw Error("Parâmetro configurado para 'fieldRecords' incorreto. Confira a resposta do servidor. [fieldRecords:" + this.fieldRecords + "]");
+				throw Error("Parâmetro configurado para 'fieldRecords' incorreto. Confira a resposta do servidor.");
 			}
 			
-			if (typeof obj == "undefined"){
-				console.error("Objeto de registros retornados pelo sistema indefinido. Confira se o argumento de 'fieldRecords' está configurado correto ou retornou algum erro do servidor. " + this.logNomeClasse);
-				this.onerror( response );
+			if (obj == undefined){
+				console.error("Objeto de registros indefinido. Confira se o argumento de 'fieldRecords' está correto. " + this.logNomeClasse);
 				return;
 			}
 			
@@ -502,7 +446,7 @@ var SimpleSearch =
 					htmlSaida += "<div> ";
 					
 					if (this.tableShowClose){
-						htmlSaida += "  <div class='text-danger pull-right acao-fechar' aria-hidden='true' title='Fechar tabela' role='button'> <h6> <span class='glyphicon glyphicon-remove text-danger'></span> Fechar </h6> </div> ";
+						htmlSaida += "  <div class='text-danger pull-right acao-fechar' aria-hidden='true' title='Fechar tabela' style='cursor: pointer;'> <h6> <span class='glyphicon glyphicon-remove text-danger'></span> Fechar </h6> </div> ";
 					}
 				}
 				
@@ -517,11 +461,8 @@ var SimpleSearch =
     					var complementoLinha = (this.inputNames && ($(this.destinoItensSelecionados + " input[value='" + item[this.fieldId] + "']").length != 0)) ? "disabled" : "";
 						valor = (this.templateField) ? this._atualizaValoresTemplate(item, this.templateField) : item[this.field];
 						valor = (!valor && this.whenNullSetEmpty) ? "" : valor;
-
-						//Verifica se tem templateComplement para exibir em duas linhas ou não
-						valor = (this.templateComplement) ? "<strong>" + valor + "</strong> <br/>" + "<small>" + this._atualizaValoresTemplate(item, this.templateComplement) + "</small>" : valor;
 						
-    					htmlSaida += "<li class='list-group-item linhaSs " + complementoLinha + "' role='button' >" + valor + " </li>"; 
+    					htmlSaida += "<li class='list-group-item linhaSs " + complementoLinha + "' style='cursor: pointer;'>" + valor + " </li>"; 
     				}, this);
     				htmlSaida += "</ul>";	    				
     				
@@ -549,7 +490,7 @@ var SimpleSearch =
 						htmlSaida += "</tr>";    						
 					}
 					
-					var complementoCss = (this.disableSelectRow != true) ? "role='button'" : "";
+					var complementoCss = (this.disableSelectRow != true) ? "style='cursor:pointer'" : "";
 					
 					//Percorrendo registros    						
 					this.arrayRegistros.forEach(function(registro, index){
@@ -560,17 +501,10 @@ var SimpleSearch =
 						}
 						
 						var valor = "";
-						var tooltip = "";
 						this.tableFields.forEach(function(col, index){
 							valor = (col.indexOf(" ") >= 0 ) ? this._atualizaValoresTemplate(registro, col) : registro[col]; //Adicionando suporte a template
 							valor = (!valor && this.whenNullSetEmpty) ? "" : valor;
-							
-							tooltip = (this.tableFieldsTooltips && this.tableFieldsTooltips[index]) ? this.tableFieldsTooltips[index] : "";
-							if (tooltip != ""){								
-								tooltip = (tooltip.indexOf(" ") >= 0 ) ? this._atualizaValoresTemplate(registro, tooltip) : this._atualizaValoresTemplate(registro, "#"+tooltip+"#"); //Adicionando suporte a template
-								tooltip = " title='" + tooltip + "'";								
-							}
-							htmlSaida += "<td" + tooltip + ">" + valor + "</td>";							
+							htmlSaida += "<td>" + valor + "</td>";							
 						}, this);
 						
 						if (this.tableLastColumn){
@@ -624,7 +558,7 @@ var SimpleSearch =
 					}
 					
 					if (dadosPaginacao){
-						htmlSaida += "<div class='text-center simple-search'> <div class='btn-group' role='group'> ";
+						htmlSaida += "<div class='btn-group' role='group'> <div class='text-center'> ";
 						htmlSaida += " <ul class='pagination'> ";
     					
     					if (dadosPaginacao){
@@ -659,7 +593,7 @@ var SimpleSearch =
 				
 				if (this.disableSelectRow != true){
 					$(this.queryContent).undelegate(".linhaSs", "click");				
-					$(this.queryContent).delegate(".linhaSs:not(.disabled)", "click", this._acaoClickMouse.bind(this));
+					$(this.queryContent).delegate(".linhaSs", "click", this._acaoClickMouse.bind(this));
 				}
 				
 				$(this.resultadoPesquisa).undelegate(".linhaSs", "mouseover");
@@ -683,15 +617,16 @@ var SimpleSearch =
 				
 			}
 			else {
-				this.setMessage( this.defaultEmptyMsg );
+				var msg = "<small><p style='margin-top: 2px;'> <span class='glyphicon glyphicon-info-sign text-primary'></span> ";
+				msg += "<strong>Nenhum resultado encontrado para o termo informado. </strong></p></small>";
+				$(this.queryContent).html( msg );
 				this.paginaAtual = ( this.paginaAtual - 1);
 			}
 			$(this.query).focus();
 		}
 		else {
-			this._logDebug( "function _trataRepostaServidor - Quase FIM : continuarExecutando = false" );
+			if (this.debug) console.log("continuarExecutando = false");
 		}
-		this.oncomplete( response );
 		
 	}
 	
@@ -752,7 +687,7 @@ var SimpleSearch =
 	_acaoClickMouse(event){
 		this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(event.currentTarget) );
 		
-		if (!$(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).hasClass("disabled") && $(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).attr("role") == "button"){
+		if (!$(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).hasClass("disabled")){
 			$(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).addClass("disabled");
 			this._selecionaLinha( this.arrayRegistros[this.indexAtual] );			
 		}
@@ -762,18 +697,12 @@ var SimpleSearch =
 	};
 
 	_acaoClickMouseRemoverItem(event){
-		//Apenas insere evento se tiver desbloqueado
-		if ( this.isBlocked == false ){
-			$(event.currentTarget).parent().parent().remove();
-			this.onremoveselecteditem( $(event.currentTarget).parent().parent().find("input[type='hidden']").val() );
-		}
+		$(event.currentTarget).parent().parent().remove();
 	};	
 
 	_acaoMouseOver(event){
 		$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
-		if (!$(event.currentTarget).hasClass("disabled")){
-			$(event.currentTarget).addClass(this.classLinhaSelecionada);			
-		}
+    	$(event.currentTarget).addClass(this.classLinhaSelecionada);
 	};
 	
 	_acaoPressKey(event){
@@ -786,11 +715,7 @@ var SimpleSearch =
 			case 13: // Tecla ENTER
 				this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );
 				if (this.indexAtual >= 0){
-					if (!$(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).hasClass("disabled")){
-						$(this.resultadoPesquisa + " .linhaSs").eq(this.indexAtual).addClass("disabled");
-						this._selecionaLinha( this.arrayRegistros[this.indexAtual] );			
-					}
-					
+					this._selecionaLinha( this.arrayRegistros[this.indexAtual] );
 					event.preventDefault();
 				}
 				else {
@@ -804,8 +729,7 @@ var SimpleSearch =
 				break;
 				
 			case 9: // Tecla TAB
-				//Limpando o valor caso digitar algo e perder o foco
-				if (this.tableKeepOpen != true && this.isDesbloqueado && this.whenBlurClear && $(this.query).val() ){
+				if (this.tableKeepOpen != true){
 					this._limparConteudo();
 				}
 				break;
@@ -819,20 +743,20 @@ var SimpleSearch =
 				break;
 				
 			case 40: // Tecla para baixo				
-				this.indexAtual = $(this.resultadoPesquisa + " .linhaSs:not(.disabled)").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );
+				this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );
 				this.indexAtual++; 
             	
             	$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
-            	$(this.resultadoPesquisa + " .linhaSs:not(.disabled):eq(" + this.indexAtual + ")").addClass(this.classLinhaSelecionada);
+            	$(this.resultadoPesquisa + " .linhaSs:eq(" + this.indexAtual + ")").addClass(this.classLinhaSelecionada);
             	event.preventDefault();
 				break;
 				
 			case 38: // Tecla para cima
-            	this.indexAtual = $(this.resultadoPesquisa + " .linhaSs:not(.disabled)").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );            	
+            	this.indexAtual = $(this.resultadoPesquisa + " .linhaSs").index( $(this.resultadoPesquisa + " ." + this.classLinhaSelecionada) );            	
             	this.indexAtual--; 
             	
             	$(this.resultadoPesquisa + " ." + this.classLinhaSelecionada).removeClass(this.classLinhaSelecionada);
-            	$(this.resultadoPesquisa + " .linhaSs:not(.disabled):eq(" + this.indexAtual + ")").addClass(this.classLinhaSelecionada);
+            	$(this.resultadoPesquisa + " .linhaSs:eq(" + this.indexAtual + ")").addClass(this.classLinhaSelecionada);
             	event.preventDefault();
 				break;
 				
@@ -923,27 +847,18 @@ var SimpleSearch =
 		this._pesquisar( (this.paginaAtual > 1) ? this.paginaAtual-1 : 1 );
 	};
 	
-	_limparConteudo(){		
-		this._logDebug( "function _limparConteudo() - START" );
-		
-		var queryContent = document.querySelector( this.queryContent );
-		if (queryContent) queryContent.innerHTML = "";
-		
+	_limparConteudo(){
+		$(this.queryContent).html("");
 		this.ultimoParametroPesquisado = "";
 		this.ultimaPalavraPesquisada = "-1";
 		this.paginaAtual = 0;
 		
-		if (this.whenBlurClear && this.queryId && !$(this.queryId).val()){
-			this._set(this.query, "");
-			this._set(this.queryId, "");
-		}
-		
-		this._logDebug( "function _limparConteudo() - END" );
+		if (this.whenBlurClear){
+			$(this.query).val("");
+		}		
 	};
 	
 	reset(){
-		this._logDebug( "function reset() - START" );
-		
 		if (!this.isBlocked){
 			$(this.query).val( "" );
 			$(this.destinoItensSelecionados).html("");
@@ -955,33 +870,11 @@ var SimpleSearch =
 			$(this.containerAutoComplete + " ." + this.classComplemento ).hide();
 		}
 		
-//		this._adicionaValorPadrao();
-		
-		this._logDebug( "function onreset() - START" );
+		this._adicionaValorPadrao();
 		this.onreset();		
-		this._logDebug( "function onreset() - END" );
-		this._logDebug( "function reset() - END" );
 	};
 	
-	/**
-	 * Retira o componente SimpleSearch do elemento
-	 */
-	destroy(){
-		this._logDebug( "function destroy()" );
-		
-		var input = $( this.query );
-		var idSimpleSearch = $( this.query ).parent().parent();
-		
-		$( this.query ).parent().parent().after( input );
-		$( idSimpleSearch ).remove();
-		
-		$( this.query ).removeClass("form-control");
-		$( this.query ).removeAttr("autocomplete");
-	}
-	
 	select( id, descricao, complemento, setFocus, row ){
-		this._logDebug( "function select() - START" );
-		
 		var descricao = (this.templateField && row) ? this._atualizaValoresTemplate(row, this.templateField) : descricao;
 		//Verifica se vai usar o modo que adiciona vários itens num container, ou se pode selecionar apenas um item no próprio seletor
 		if (!this.inputNames){
@@ -1029,12 +922,9 @@ var SimpleSearch =
 			$(this.destinoItensSelecionados).delegate(".itemSs", "click", this._acaoClickMouseRemoverItem.bind(this));
 		}
 		
-		this._logDebug( "function select() - END" );
 	};
 	
 	disabled(){
-		this._logDebug( "function disabled()" );
-		
 		this.isBlocked = true;
 		
 		if (this.query){
@@ -1045,17 +935,10 @@ var SimpleSearch =
 			$(this.queryButton).attr( "disabled", "disabled" );
 		}
 		
-		//Se for no formato multi itens, desabilita os itens selecionados, para NÃO permitir remover os itens
-		if (this.inputNames){
-			$( this. getContainer() ).find(".itemSs").attr( "disabled", "disabled" );
-		}
-		
 		this._removeEventos();
 	};
 	
 	enabled(){
-		this._logDebug( "function enabled()" );
-		
 		this.isBlocked = false;
 		this._adicionaEventos();
 		
@@ -1063,11 +946,6 @@ var SimpleSearch =
 			if (this.isDesbloqueado){
 				$(this.query).removeAttr( "readonly");
 				$(this.query).parent().find(".glyphicon").removeClass("glyphicon-lock").addClass("glyphicon-search").removeClass("glyphicon-remove");
-				
-				//Se for no formato multi itens, habilita os itens selecionados, para PERMITIR remover os itens
-				if (this.inputNames){
-					$( this. getContainer() ).find(".itemSs").removeAttr( "disabled" );
-				}
 			}
 			else {
 				$(this.query).parent().find(".glyphicon").removeClass("glyphicon-lock").removeClass("glyphicon-search").addClass("glyphicon-remove");
@@ -1079,29 +957,7 @@ var SimpleSearch =
 	};
 	
 	focus(){
-		this._logDebug( "function focus()" );
 		$(this.query).focus();
 	};
-	
-	search( pagina ){
-		this._logDebug( "function search()" );
-		this._pesquisar( pagina );
-	};
   
-	getContainer(){
-		return this.containerAutoComplete;
-	};
-
-	disableRowByIndex( index ){
-		var container = (this.queryContent) ? this.queryContent : this.getContainer(); 
-		$( container + " .linhaSs").eq(index).removeAttr("role");
-		$( container + " .linhaSs").eq(index).find(".glyphicon-ok").hide();
-		$( container + " .linhaSs").eq(index).addClass("disabled");
-	};
-
-	setMessage( customMsg ){
-		var msgEmptyResults = (customMsg) ?  customMsg : "Nenhum resultado encontrado para o termo informado.";
-		$(this.queryContent).html( "<p style='margin-top: 2px;'><strong> "+msgEmptyResults+" </strong></p>" );
-	};
-
 };
