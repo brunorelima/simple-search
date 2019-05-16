@@ -164,7 +164,7 @@ $(document).ready(function() {
 	});
 
 	//Com container de itens mantendo aberto
-	var ssBuscaComItensIniciado =  new SimpleSearch({
+	var ssBuscaComItensIniciadoMantendoAberto =  new SimpleSearch({
 //		url: urlControlador, // "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		response: function( pagina, termo ){
 			return  pesquisaOffline( pagina, termo );
@@ -179,7 +179,10 @@ $(document).ready(function() {
 	
 	//Com container de itens iniciado
 	var ssBuscaComItensIniciado =  new SimpleSearch({
-		url: urlControlador,
+//		url: urlControlador,
+		response: function( pagina, termo ){
+			return  pesquisaOffline( pagina, termo );
+		},
 		query: "#busca08",
 		field: "ds_nome",
 // 		fieldId: "id",
@@ -296,6 +299,54 @@ $(document).ready(function() {
 	});
 
 
+	//Várias configurações juntas
+	var ssDeTudo1 =  new SimpleSearch({
+//		url: urlControlador, // "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
+		response: function( pagina, termo ){
+			return  pesquisaOffline( pagina, termo );
+		},
+		query: "#detudo1",
+		queryId: "#detudo1valor",
+		field: "ds_nome",
+ 		fieldId: "id",
+ 		fieldRecords: "obj.registros",
+		fieldPages: "obj.navegacao.paginas",
+		tableTitles: ["Sigla", "Nome"],
+		tableFields: ["ds_sigla", "ds_nome"],
+		tableFieldsTooltips: ["Sigla do Estado: #ds_sigla#", "Nome do Estado: #ds_nome#"],
+		//templateField: "#ds_sigla# - #ds_nome#",
+		//templateComplement: "Sigla #ds_sigla#",
+		defaultEmptyMsg : "Lista vazia. Tente mudar o filtro.",
+		defaultValue: [[19, "Rio de Janeiro", "RJ"], [8, "Espírito Santo", "ES"]],
+		inputNames: "estadosSelecionados[]",
+		delayAutoSearch: 1200,
+		
+		tableShowSelect: true, //Para exibir ícone de selecionar
+		tableKeepOpen: true, //Para manter aberto ao perder o foco		
+		whenSelectKeepOpen: true,
+		onselect: function( row ){ 
+			alert("Adicionando: " + row.id + " " + row.ds_nome); 
+			return true; 
+		},
+		onreset: function( row ){ 
+			$("#ssDeTudo1").val(""); 
+		},
+		onremoveselecteditem: function(itemId){ 
+			alert("Removendo itemId: " + itemId); 
+		},
+		oncomplete: function(response){
+			//Exemplo de como desativar um item
+			for (var i = 0; i < response.obj.registros.length; i++) {
+				if (response.obj.registros[i].id == 5){
+					ssDeTudo1.disableRowByIndex(i);					
+				}
+			}
+		},
+
+	});
+	ssDeTudo1.select(11, "Minas Gerais", "MG");
+	
+	
 
 	//---------------------------------------------------------
 	var limparSs = function(){

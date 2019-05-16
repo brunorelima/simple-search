@@ -92,12 +92,16 @@
 			<code>  &#60;script src="/recursos/simpleSearch/js/simpleSearch.min.js" type="application/javascript"&#62; &#60;/script&#62; </code>
 		</div>
 		<br />
-		<p> Caso o projeto não tenha importado o Twitter Boostrap ainda, é necessário importar o estilo base, escolhendo entre recursos mínimos usados do Bootstrap, ou uma versão simplificada de css. </p>
-		<div>
-			<code> &#60;link rel="stylesheet" href="/recursos/simpleSearch/css/simpleSearch.bootstrap.min.css" type="text/css" /&#62; </code>
-		</div>
+		<br />
+		<p> Caso o projeto não utilize o css do Twitter Bootstrap, é necessário importar um estilo css. Podendo escolher entre o css com estilo baseado no bootstrap ou baseado em telas antigas. </p>
+		<br />
+		<p> Estilo igual ao Twitter Bootstrap </p>
 		<div>		
 			<code> &#60;link rel="stylesheet" href="/recursos/simpleSearch/css/simpleSearch.min.css" type="text/css" /&#62; </code>
+		</div>
+		<p> Estilo baseado em tela de sistema legado </p>
+		<div>
+			<code> &#60;link rel="stylesheet" href="/recursos/simpleSearch/css/simpleSearch.basic.min.css" type="text/css" /&#62; </code>
 		</div>
 	</div>
 	
@@ -494,7 +498,7 @@
 <pre>
 <code>		
 	//Com container de itens
-	var ssBuscaComItens =  new SimpleSearch({
+	var ssBuscaComItensIniciadoMantendoAberto =  new SimpleSearch({
 		url: "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
 		query: "#busca072",
 		field: "ds_nome",
@@ -795,6 +799,78 @@
 		</div>
 		
 		
+		<legend> Compilado </legend>
+		<div class="item-exemplo">
+		
+			<div class="form-group"> 
+				<label for="busca" class="col-sm-2 control-label"> De tudo </label> 
+				<div class="col-sm-5"> 
+					<input type="text" class="form-control" id="detudo1" />
+				</div> 
+				<div class="col-sm-1">
+					<input type="text" class="form-control" id="detudo1valor" readonly />
+				</div>
+				<div class="col-sm-4">
+					<a href="javascript:void(0)" class="btn btn-link act-view-source-btn" >view source</a> 
+				</div>
+			</div>
+	
+			<div class="form-group act-view-source-div" style="display: none;"> 
+				<div class="col-sm-2"> </div>
+				<div class="col-sm-6">			
+					<pre>
+<code>		
+	//Várias configurações juntas
+	var ssDeTudo1 =  new SimpleSearch({
+		url: urlControlador, // "/CAD/arquivosExemplo/controlador/consultarCmUf.php",
+		query: "#detudo1",
+		queryId: "#detudo1valor",
+		field: "ds_nome",
+ 		fieldId: "id",
+ 		fieldRecords: "obj.registros",
+		fieldPages: "obj.navegacao.paginas",
+		tableTitles: ["Sigla", "Nome"],
+		tableFields: ["ds_sigla", "ds_nome"],
+		tableFieldsTooltips: ["Sigla do Estado: #ds_sigla#", "Nome do Estado: #ds_nome#"],
+		//templateField: "#ds_sigla# - #ds_nome#",
+		//templateComplement: "Sigla #ds_sigla#",
+		defaultEmptyMsg : "Lista vazia. Tente mudar o filtro.",
+		defaultValue: [[19, "Rio de Janeiro", "RJ"], [8, "Espírito Santo", "ES"]],
+		inputNames: "estadosSelecionados[]",
+		delayAutoSearch: 1200,
+		
+		tableShowSelect: true, //Para exibir ícone de selecionar
+		tableKeepOpen: true, //Para manter aberto ao perder o foco		
+		whenSelectKeepOpen: true,
+		onselect: function( row ){ 
+			alert("Adicionando: " + row.id + " " + row.ds_nome); 
+			return true; 
+		},
+		onreset: function( row ){ 
+			$("#ssDeTudo1").val(""); 
+		},
+		onremoveselecteditem: function(itemId){ 
+			alert("Removendo itemId: " + itemId); 
+		},
+		oncomplete: function(response){
+			//Exemplo de como desativar um item
+			for (var i = 0; i < response.obj.registros.length; i++) {
+				if (response.obj.registros[i].id == 5){
+					ssDeTudo1.disableRowByIndex(i);					
+				}
+			}
+		},
+
+	});
+	ssDeTudo1.select(11, "Minas Gerais", "MG");
+</code>		
+					</pre>
+				</div>	
+				<div class="col-sm-4"> </div>
+			</div>	
+		
+		</div>
+		
 		
 		<legend> Reset </legend>
 		<div class="barraTarefasFormulario">
@@ -884,6 +960,13 @@
 			</td>
 		</tr>
 		<tr>
+			<td>defaultEmptyMsg</td>
+			<td>Altera a mensagem padrão exibida quando não é retornado nenhum registro após a pesquisa.</td>
+			<td>
+				defaultEmptyMsg: "Nenhum registro para ser exibido." 
+			</td>
+		</tr>
+		<tr>
 			<td>data</td>
 			<td>Informa na função de callback os parâmetros enviados antes da pesquisa</td>
 			<td> 
@@ -938,6 +1021,11 @@
 			<td> tableFields: ["ds_sigla", "ds_nome"]  </td>
 		</tr>
 		<tr>
+			<td>tableFieldsTooltips</td>
+			<td>Informa a legenda para ser exibida ao passar o mouse em cima dos fields</td>
+			<td> tableFieldsTooltips: ["ds_sigla", "ds_nome"]  </td>
+		</tr>
+		<tr>
 			<td>tableShowSelect</td>
 			<td> Exibe a coluna de selecionar no ínicio da tabela </td>
 			<td> tableShowSelect: true  </td>
@@ -972,6 +1060,11 @@
 			<td> whenBlurClear: true  </td>
 		</tr>
 		<tr>
+			<td>whenNullSetEmpty</td>
+			<td> Quando vier "null" na resposta, limpa e mostra vazio, quando tiver atribuído a propriedade para "true". </td>
+			<td> whenNullSetEmpty: true  </td>
+		</tr>
+		<tr>
 			<td>whenSelectKeepOpen</td>
 			<td> Quando seleciona o item, mantem a caixa aberta (usado com múltiplos itens). </td>
 			<td> whenSelectKeepOpen: true  </td>
@@ -987,6 +1080,11 @@
 		</tr>		
 		
 		<tr>
+			<td>responseChange</td>
+			<td>Usado para manipular a resposta do servidor antes de popular o componente</td>
+			<td>responseChange: function( response ){ return response; } </td>
+		</tr>
+		<tr>
 			<td>onselect</td>
 			<td>Cria uma função para ser executado ao selecionar algum item da lista</td>
 			<td>onselect: function( row ){ $("#destinoValor").val("Nome: " + row.ds_nome); } </td>
@@ -1000,6 +1098,21 @@
 			<td>onsuccess</td>
 			<td>Cria uma função para ser executado ao receber a resposta do servidor</td>
 			<td>onsuccess: function( response ){ if (response.status == 'erro') throw Error("Deu erro na resposta do servidor!"); } </td>
+		</tr>
+		<tr>
+			<td>onerror</td>
+			<td>Cria uma função para ser executado quando a resposta do servidor vem com algum tipo de erro</td>
+			<td>onerror: function( response ){ util.alertaPadraoMsgErroAjax( response ); } </td>
+		</tr>
+		<tr>
+			<td>oncomplete</td>
+			<td>Cria uma função para ser executado após tratar a resposta do servidor e ter montado o componente</td>
+			<td>oncomplete: function( response ){ console.log("Manipulação de colunas por exemplo..."); } </td>
+		</tr>
+		<tr>
+			<td>onremoveselecteditem</td>
+			<td>Executa ação ao clicar para remover um item selecionado da lista</td>
+			<td>onremoveselecteditem: function(itemId){ alert(itemId); } </td>
 		</tr>
 <!-- 		<tr> -->
 <!-- 			<td></td> -->
@@ -1041,6 +1154,26 @@
 			<td>focus()</td>
 			<td>Seta foco para o elemento. </td>
 			<td>ssEstados.focus(); </td>
+		</tr>
+		<tr>
+			<td>search()</td>
+			<td>Executa a pesquisa, podendo passar como parâmetro o número da página também. </td>
+			<td>ssEstados.search(); <br> ssEstados.search(1); </td>
+		</tr>
+		<tr>
+			<td>getContainer()</td>
+			<td>Retorna o id do componente criado. Exemplo: "#containerSimpleSearch5" </td>
+			<td>ssEstados.getContainer(); </td>
+		</tr>
+		<tr>
+			<td>disableRowByIndex( index )</td>
+			<td>Desabilita o select da linha informada.  </td>
+			<td>ssEstados.disableRowByIndex( 3 ); </td>
+		</tr>
+		<tr>
+			<td>setMessage( msg )</td>
+			<td>Define a mensagem exibida abaixo do elemento, caso necessário exibir mensagem diferente da mensagem padrão.  </td>
+			<td>ssEstados.setMessage( "Não foram encontrados registros correspondentes às suas permissões de acesso." ); </td>
 		</tr>
 	</table>
 	
